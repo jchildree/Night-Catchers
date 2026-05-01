@@ -5,7 +5,6 @@ import com.nightcatchers.core.common.NightCatchersDispatchers
 import com.nightcatchers.core.data.local.dao.PetStateDao
 import com.nightcatchers.core.data.local.entity.toDomain
 import com.nightcatchers.core.data.local.entity.toEntity
-import com.nightcatchers.core.domain.model.EvolutionStage
 import com.nightcatchers.core.domain.model.PetInteraction
 import com.nightcatchers.core.domain.model.PetState
 import com.nightcatchers.core.domain.model.PetStats
@@ -44,7 +43,6 @@ class PetRepositoryImpl @Inject constructor(
             val newState = current.copy(
                 stats = updated,
                 mood = getMoodState(updated),
-                stage = evolveIfReady(current.stage, updated.trust),
                 lastInteractedAt = now,
                 updatedAt = now,
             )
@@ -93,9 +91,4 @@ class PetRepositoryImpl @Inject constructor(
             )
         }
 
-    private fun evolveIfReady(current: EvolutionStage, trust: Int): EvolutionStage = when {
-        current == EvolutionStage.BABY && trust >= EvolutionStage.TEEN.trustGate -> EvolutionStage.TEEN
-        current == EvolutionStage.TEEN && trust >= EvolutionStage.ADULT.trustGate -> EvolutionStage.ADULT
-        else -> current
-    }
 }

@@ -16,6 +16,7 @@ import com.nightcatchers.core.domain.repository.MonsterRepository
 import com.nightcatchers.core.domain.repository.PetRepository
 import com.nightcatchers.core.domain.repository.ShareRepository
 import com.nightcatchers.core.domain.repository.UserRepository
+import com.nightcatchers.core.security.DatabaseKeyManager
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -31,10 +32,11 @@ import javax.inject.Singleton
 object DatabaseModule {
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): NightCatchersDatabase {
-        // SQLCipher passphrase derived at runtime via Android KeyStore (see :core:security)
-        // For now the key is retrieved from secure storage; placeholder shown here.
-        val passphrase = SQLiteDatabase.getBytes("nightcatchers_secure_key".toCharArray())
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+        keyManager: DatabaseKeyManager,
+    ): NightCatchersDatabase {
+        val passphrase = SQLiteDatabase.getBytes(keyManager.getOrCreatePassphrase())
         val factory = SupportFactory(passphrase)
         return Room.databaseBuilder(context, NightCatchersDatabase::class.java, "nightcatchers.db")
             .openHelperFactory(factory)

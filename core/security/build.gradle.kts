@@ -12,4 +12,5 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation(libs.bcrypt)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.security.crypto)
 }

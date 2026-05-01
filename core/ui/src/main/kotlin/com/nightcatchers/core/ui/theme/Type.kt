@@ -2,34 +2,22 @@ package com.nightcatchers.core.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.nightcatchers.core.ui.R
 
 // Section 09 typography spec:
 //   Fredoka One  — display (monster names, CTAs)       weight 400 only
 //   Nunito       — body copy, UI labels                weights 400, 600, 700
 //   Space Mono   — stat readouts, PKE meter values     weights 400, 700
 //
-// Fonts must be added to res/font/. Using FontFamily.Default as fallback
-// until assets are added; replace Font() references when font files are in place.
+// TODO: add fredoka_one_regular.ttf, nunito_{regular,semibold,bold}.ttf,
+//       space_mono_{regular,bold}.ttf to core/ui/src/main/res/font/ and
+//       replace these FontFamily.Default fallbacks with Font(R.font.*) calls.
 
-val FredokaOne = FontFamily(
-    Font(R.font.fredoka_one_regular, FontWeight.Normal),
-)
-
-val Nunito = FontFamily(
-    Font(R.font.nunito_regular, FontWeight.Normal),
-    Font(R.font.nunito_semibold, FontWeight.SemiBold),
-    Font(R.font.nunito_bold, FontWeight.Bold),
-)
-
-val SpaceMono = FontFamily(
-    Font(R.font.space_mono_regular, FontWeight.Normal),
-    Font(R.font.space_mono_bold, FontWeight.Bold),
-)
+val FredokaOne: FontFamily = FontFamily.Default
+val Nunito: FontFamily = FontFamily.Default
+val SpaceMono: FontFamily = FontFamily.Monospace
 
 val NightCatchersTypography = Typography(
     // Monster names, main CTA labels, capture success banners

@@ -4,8 +4,14 @@ import androidx.compose.ui.graphics.Color
 
 // ── Capture Mode palette (Ghostbusters aesthetic, section 09) ──
 val SlimeGreen = Color(0xFF7FFF00)
+val SlimeGreenDark = Color(0xFF3D8A00)
 val EctoplasmCyan = Color(0xFF00F5FF)
+val EctoplasmTeal = Color(0xFF00CCE0)
 val DeepNight = Color(0xFF080C14)
+val DeepVoid = Color(0xFF050810)
+val MonsterPurple = Color(0xFF9B5DE5)
+val GhostPurple = Color(0xFF9B5DE5)
+val GhostPurpleLight = Color(0xFFBD8FFF)
 val RarityGold = Color(0xFFFFD700)
 val DangerRed = Color(0xFFFF4D4D)
 
