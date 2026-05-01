@@ -7,6 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
+import com.nightcatchers.feature.pet.PetRoomScreen
+import com.nightcatchers.feature.vault.VaultScreen
 
 @Composable
 fun NightCatchersNavGraph(
@@ -51,7 +53,9 @@ fun NightCatchersNavGraph(
         // ── Vault nested graph ──
         navigation<Dest.Vault>(startDestination = Dest.Vault) {
             composable<Dest.Vault> {
-                // VaultScreen
+                VaultScreen(
+                    onNavigateToPet = { monsterId -> navController.navigateToPet(monsterId) },
+                )
             }
             composable<Dest.VaultDetail> { back ->
                 val dest = back.toRoute<Dest.VaultDetail>()
@@ -67,7 +71,10 @@ fun NightCatchersNavGraph(
         navigation<Dest.PetRoom>(startDestination = Dest.PetRoom("")) {
             composable<Dest.PetRoom> { back ->
                 val dest = back.toRoute<Dest.PetRoom>()
-                // PetRoomScreen(monsterId = dest.monsterId)
+                PetRoomScreen(
+                    monsterId = dest.monsterId,
+                    onNavigateBack = { navController.popBackStack() },
+                )
             }
             composable<Dest.PetPlay> { back ->
                 val dest = back.toRoute<Dest.PetPlay>()
@@ -109,10 +116,16 @@ fun NightCatchersNavGraph(
     }
 }
 
-// Navigation extensions from section 10
+// Navigation extensions
 
 fun NavHostController.navigateToCapture(monsterId: String) {
     navigate(Dest.ScanCapture(monsterId))
+}
+
+fun NavHostController.navigateToPet(monsterId: String) {
+    navigate(Dest.PetRoom(monsterId)) {
+        launchSingleTop = true
+    }
 }
 
 fun NavHostController.navigateToPetAfterCapture(monsterId: String) {
