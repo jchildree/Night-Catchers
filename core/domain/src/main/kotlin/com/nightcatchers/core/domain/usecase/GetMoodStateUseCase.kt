@@ -1,0 +1,19 @@
+package com.nightcatchers.core.domain.usecase
+
+import com.nightcatchers.core.domain.model.Mood
+import com.nightcatchers.core.domain.model.PetStats
+import javax.inject.Inject
+
+class GetMoodStateUseCase @Inject constructor() {
+    operator fun invoke(stats: PetStats): Mood = deriveMood(stats)
+
+    private fun deriveMood(stats: PetStats): Mood = when {
+        stats.energy < 20 -> Mood.SLEEPY
+        stats.hunger < 20 -> Mood.GRUMPY
+        stats.happiness < 20 -> Mood.LONELY
+        stats.spookiness > 85 -> Mood.SPOOKED
+        stats.happiness > 80 && stats.energy > 70 -> Mood.EXCITED
+        stats.happiness > 60 && stats.trust > 50 -> Mood.PLAYFUL
+        else -> Mood.CONTENT
+    }
+}
