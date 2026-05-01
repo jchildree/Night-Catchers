@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.nightcatchers.android.application)
     alias(libs.plugins.nightcatchers.hilt)
-    alias(libs.plugins.nightcatchers.compose)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
 }
@@ -45,6 +44,5 @@ dependencies {
     implementation(libs.firebase.appcheck.playintegrity)
     debugImplementation(libs.firebase.appcheck.debug)
 
-    coreLibraryDesugaring(libs.findLibrary("android-desugar-jdk-libs").orElse(provider { null }).orNull
-        ?: "com.android.tools:desugar_jdk_libs:2.1.3")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
 }

@@ -23,7 +23,7 @@ dependencies {
     implementation(libs.arcore)
 
     // ML Kit
-    implementation(libs.mlkit.object.detection)
+    implementation("com.google.mlkit:object-detection:17.0.2")
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)

@@ -1,3 +1,8 @@
 {
-    "gradle.allowParallelRun": true
+    "gradle.allowParallelRun": true,
+    "python.testing.pytestArgs": [
+        "app"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

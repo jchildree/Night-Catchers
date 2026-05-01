@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
     implementation(libs.sqlcipher.android)
+    implementation(libs.bcrypt)
 
     // Firebase
     implementation(platform(libs.firebase.bom))
