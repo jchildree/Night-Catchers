@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -50,7 +51,6 @@ import com.nightcatchers.core.domain.model.Rarity
 import com.nightcatchers.core.ui.component.MonsterAvatar
 import com.nightcatchers.core.ui.theme.DeepNight
 import com.nightcatchers.core.ui.theme.PetRoomBgTop
-import com.nightcatchers.core.ui.theme.RarityColor
 import com.nightcatchers.core.ui.theme.RarityCommon
 import com.nightcatchers.core.ui.theme.RarityGold
 import com.nightcatchers.core.ui.theme.RarityLegendary
@@ -62,6 +62,7 @@ import com.nightcatchers.core.ui.theme.SoftLavender
 fun DexScreen(
     modifier: Modifier = Modifier,
     viewModel: DexViewModel = hiltViewModel(),
+    onNavigateToDetail: (String) -> Unit = {},
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -96,7 +97,10 @@ fun DexScreen(
             modifier = Modifier.fillMaxSize(),
         ) {
             items(state.entries) { entry ->
-                DexEntryCard(entry = entry)
+                DexEntryCard(
+                    entry = entry,
+                    onClick = { onNavigateToDetail(entry.archetype.id) },
+                )
             }
         }
     }
@@ -196,13 +200,17 @@ private fun DexFilters(
 }
 
 @Composable
-private fun DexEntryCard(entry: DexEntry) {
+private fun DexEntryCard(
+    entry: DexEntry,
+    onClick: () -> Unit = {},
+) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = if (entry.isDiscovered) Color.White.copy(alpha = 0.1f) else Color.Black.copy(alpha = 0.3f),
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f),
+            .aspectRatio(1f)
+            .clickable(onClick = onClick),
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

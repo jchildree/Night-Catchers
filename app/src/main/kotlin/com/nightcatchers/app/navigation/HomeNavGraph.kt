@@ -29,6 +29,8 @@ import com.nightcatchers.feature.parental.ParentalDashboardScreen
 import com.nightcatchers.feature.parental.PinGateScreen
 import com.nightcatchers.feature.pet.PetRoomScreen
 import com.nightcatchers.feature.vault.MonsterDetailScreen
+import com.nightcatchers.feature.vault.VaultScreen
+import com.nightcatchers.feature.dex.DexDetailScreen
 import com.nightcatchers.feature.dex.DexScreen
 
 /**
@@ -125,7 +127,14 @@ fun HomeNavGraph(
         // ── Dex tab ────────────────────────────────────────────────────────
         navigation<Dest.Dex>(startDestination = Dest.Dex) {
             composable<Dest.Dex> {
-                DexScreen()
+                DexScreen(
+                    onNavigateToDetail = { archetypeId ->
+                        navController.navigate(Dest.DexDetail(archetypeId))
+                    },
+                )
+            }
+            composable<Dest.DexDetail> {
+                DexDetailScreen()
             }
             composable<Dest.DexAchievement> { }
             composable<Dest.DexShare> { }

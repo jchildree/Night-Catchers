@@ -16,6 +16,7 @@ google-services-dev.json
 # Kotlin
 *.class
 *.kotlin_module
+/.kotlin/
 
 # Gradle
 .gradle/
