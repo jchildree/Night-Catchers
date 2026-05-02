@@ -6,6 +6,9 @@ import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.nightcatchers.feature.pet.worker.AnniversaryCheckWorker
 import com.nightcatchers.feature.pet.worker.ShareReviewWorker
 import com.nightcatchers.feature.pet.worker.StatDecayWorker
@@ -26,7 +29,17 @@ class NightCatchersApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        initFirebaseAppCheck()
         scheduleBackgroundWorkers()
+    }
+
+    private fun initFirebaseAppCheck() {
+        val provider = if (BuildConfig.DEBUG) {
+            DebugAppCheckProviderFactory.getInstance()
+        } else {
+            PlayIntegrityAppCheckProviderFactory.getInstance()
+        }
+        FirebaseAppCheck.getInstance().installAppCheckProviderFactory(provider)
     }
 
     private fun scheduleBackgroundWorkers() {

@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monster Catcher · Claude Code Design Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Fredoka+One&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ─── RESET & ROOT ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  /* ── Capture / Ghostbusters ── */
+  --lime:     #7FFF00;
+  --cyan:     #00F5FF;
+  --red:      #FF6B6B;
+  --gold:     #FFD700;
+  --orange:   #FF9F43;
+  /* ── Pet / "If" ── */
+  --peach:    #FFB347;
+  --lavender: #C77DFF;
+  --coral:    #FF6F61;
+  --mint:     #A8EDCA;
+  --cloud:    #EAF4FB;
+  --blush:    #FFD6E7;
+  --butter:   #FFF3B0;
+  /* ── Neutrals ── */
+  --bg:       #080C14;
+  --panel:    #0D1420;
+  --card:     #111827;
+  --border:   rgba(255,255,255,0.07);
+  --text:     #E8F4FD;
+  --mid:      rgba(232,244,253,0.60);
+  --dim:      rgba(232,244,253,0.30);
+  --mute:     rgba(232,244,253,0.14);
+  /* ── Fonts ── */
+  --ff-display: 'Fredoka One', cursive;
+  --ff-mono:    'Space Mono', monospace;
+  --ff-body:    'Outfit', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ff-body);
+  font-weight: 400;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── BACKGROUND GRID ──────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(127,255,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(127,255,0,0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── LAYOUT ───────────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── SIDEBAR ──────────────────────────────────────────────────── */
+nav.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  background: rgba(13,20,32,0.95);
+  border-right: 1px solid var(--border);
+  padding: 28px 0;
+  backdrop-filter: blur(12px);
+}
+
+.sidebar-logo {
+  padding: 0 20px 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.sidebar-logo .logo-title {
+  font-family: var(--ff-display);
+  font-size: 18px;
+  color: var(--lime);
+  line-height: 1.1;
+}
+.sidebar-logo .logo-sub {
+  font-family: var(--ff-mono);
+  font-size: 8px;
+  color: var(--dim);
+  letter-spacing: 0.18em;
+  margin-top: 4px;
+}
+
+.nav-group {
+  padding: 8px 12px 4px;
+  font-family: var(--ff-mono);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: var(--dim);
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  font-family: var(--ff-body);
+  font-size: 12px;
+  color: var(--mid);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.nav-link:hover, .nav-link.active {
+  color: var(--lime);
+  border-left-color: var(--lime);
+  background: rgba(127,255,0,0.05);
+}
+.nav-link .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+/* ─── MAIN CONTENT ─────────────────────────────────────────────── */
+main { padding: 48px 56px; max-width: 960px; }
+
+/* ─── SECTIONS ─────────────────────────────────────────────────── */
+section { margin-bottom: 80px; scroll-margin-top: 32px; }
+
+.section-eyebrow {
+  font-family: var(--ff-mono);
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  color: var(--lime);
+  margin-bottom: 8px;
+}
+.section-title {
+  font-family: var(--ff-display);
+  font-size: 36px;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.section-sub {
+  font-family: var(--ff-mono);
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 0.12em;
+  margin-bottom: 32px;
+}
+.section-rule {
+  height: 1px;
+  background: linear-gradient(90deg, var(--lime), transparent);
+  margin-bottom: 32px;
+  opacity: 0.4;
+}
+
+/* ─── CARDS ────────────────────────────────────────────────────── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+.card-accent { border-left-width: 3px; }
+.card-lime   { border-left-color: var(--lime); }
+.card-cyan   { border-left-color: var(--cyan); }
+.card-lav    { border-left-color: var(--lavender); }
+.card-gold   { border-left-color: var(--gold); }
+.card-peach  { border-left-color: var(--peach); }
+
+/* ─── GRID HELPERS ─────────────────────────────────────────────── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* ─── TAGS / BADGES ────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  font-family: var(--ff-mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+.badge-lime   { color: var(--lime);     background: rgba(127,255,0,0.10);  border-color: rgba(127,255,0,0.3);  }
+.badge-cyan   { color: var(--cyan);     background: rgba(0,245,255,0.10);  border-color: rgba(0,245,255,0.3);  }
+.badge-lav    { color: var(--lavender); background: rgba(199,125,255,0.10);border-color: rgba(199,125,255,0.3);}
+.badge-gold   { color: var(--gold);     background: rgba(255,215,0,0.10);  border-color: rgba(255,215,0,0.3);  }
+.badge-red    { color: var(--red);      background: rgba(255,107,107,0.10);border-color: rgba(255,107,107,0.3);}
+.badge-peach  { color: var(--peach);    background: rgba(255,179,71,0.10); border-color: rgba(255,179,71,0.3); }
+
+/* ─── CODE BLOCKS ──────────────────────────────────────────────── */
+pre {
+  background: #060A10;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 22px;
+  overflow-x: auto;
+  font-family: var(--ff-mono);
+  font-size: 11.5px;
+  line-height: 1.75;
+  color: #A8EDCA;
+}
+code { font-family: var(--ff-mono); font-size: 11.5px; }
+.cm  { color: rgba(232,244,253,0.35); }
+.ck  { color: var(--cyan); }
+.cv  { color: var(--lime); }
+.cs  { color: var(--butter); }
+.ct  { color: var(--lavender); }
+.cp  { color: var(--peach); }
+
+/* ─── TABLE ────────────────────────────────────────────────────── */
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+  font-family: var(--ff-mono);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--mid);
+  vertical-align: top;
+}
+td:first-child { color: var(--text); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* ─── SWATCH GRID ──────────────────────────────────────────────── */
+.swatch {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.swatch-color { height: 56px; }
+.swatch-info { padding: 10px 12px; background: var(--card); }
+.swatch-hex  { font-family: var(--ff-mono); font-size: 10px; color: var(--text); }
+.swatch-name { font-family: var(--ff-body); font-size: 10px; color: var(--mid); margin-top: 2px; }
+
+/* ─── CALLOUT ──────────────────────────────────────────────────── */
+.callout {
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin: 20px 0;
+}
+.callout-lime   { background: rgba(127,255,0,0.06);  border: 1px solid rgba(127,255,0,0.2);  border-left: 3px solid var(--lime);   }
+.callout-lav    { background: rgba(199,125,255,0.06);border: 1px solid rgba(199,125,255,0.2);border-left: 3px solid var(--lavender);}
+.callout-gold   { background: rgba(255,215,0,0.06);  border: 1px solid rgba(255,215,0,0.2);  border-left: 3px solid var(--gold);   }
+.callout-red    { background: rgba(255,107,107,0.06);border: 1px solid rgba(255,107,107,0.2);border-left: 3px solid var(--red);    }
+.callout-emoji  { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.callout-label  { font-family: var(--ff-mono); font-size: 8px; letter-spacing: 0.2em; margin-bottom: 5px; }
+.callout-body   { font-size: 12.5px; color: var(--mid); line-height: 1.7; }
+
+/* ─── UTIL ─────────────────────────────────────────────────────── */
+p    { font-size: 13px; color: var(--mid); line-height: 1.75; margin-bottom: 14px; }
+h3   { font-family: var(--ff-display); font-size: 20px; color: var(--text); margin-bottom: 14px; }
+h4   { font-family: var(--ff-mono); font-size: 10px; letter-spacing: 0.18em; color: var(--dim); margin-bottom: 10px; }
+ul   { padding-left: 18px; color: var(--mid); font-size: 12.5px; line-height: 1.85; }
+li   { margin-bottom: 3px; }
+a    { color: var(--lime); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.gap-8  { gap: 8px;  display: flex; flex-direction: column; }
+.gap-16 { gap: 16px; display: flex; flex-direction: column; }
+.mb-8   { margin-bottom: 8px; }
+.mb-16  { margin-bottom: 16px; }
+.mb-24  { margin-bottom: 24px; }
+.mb-32  { margin-bottom: 32px; }
+.mono   { font-family: var(--ff-mono); font-size: 11px; }
+.text-lime { color: var(--lime); }
+.text-cyan { color: var(--cyan); }
+.text-lav  { color: var(--lavender); }
+.text-dim  { color: var(--dim); }
+.small     { font-size: 11px; }
+
+/* ─── SCROLLBAR ────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(127,255,0,0.25); border-radius: 3px; }
+
+/* ─── HERO ─────────────────────────────────────────────────────── */
+.hero {
+  background: linear-gradient(135deg, rgba(127,255,0,0.08) 0%, rgba(0,245,255,0.04) 50%, rgba(199,125,255,0.06) 100%);
+  border: 1px solid rgba(127,255,0,0.15);
+  border-radius: 20px;
+  padding: 40px 48px;
+  margin-bottom: 56px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '👻';
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 80px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+.hero-title {
+  font-family: var(--ff-display);
+  font-size: 48px;
+  line-height: 1.05;
+  color: var(--lime);
+  margin-bottom: 12px;
+}
+.hero-sub {
+  font-family: var(--ff-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--dim);
+  margin-bottom: 20px;
+}
+.hero-desc {
+  font-size: 14px;
+  color: var(--mid);
+  line-height: 1.75;
+  max-width: 600px;
+}
+.hero-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-title">👾 Monster Catcher</div>
+    <div class="logo-sub">CLAUDE CODE DESIGN GUIDE · v1.0</div>
+  </div>
+
+  <div class="nav-group">OVERVIEW</div>
+  <a class="nav-link" href="#overview"><span class="nav-icon">🏠</span>Project Brief</a>
+  <a class="nav-link" href="#design-philosophy"><span class="nav-icon">🎨</span>Design Philosophy</a>
+
+  <div class="nav-group">VISUAL SYSTEM</div>
+  <a class="nav-link" href="#colors"><span class="nav-icon">🌈</span>Color System</a>
+  <a class="nav-link" href="#typography"><span class="nav-icon">✍️</span>Typography</a>
+  <a class="nav-link" href="#motion"><span class="nav-icon">🌀</span>Motion &amp; Haptics</a>
+
+  <div class="nav-group">AR FILTER SYSTEM</div>
+  <a class="nav-link" href="#ar-overview"><span class="nav-icon">📷</span>Filter Architecture</a>
+  <a class="nav-link" href="#filter-catalog"><span class="nav-icon">👻</span>Filter Catalog</a>
+  <a class="nav-link" href="#perf-budget"><span class="nav-icon">📊</span>Performance Budget</a>
+
+  <div class="nav-group">PET SYSTEM</div>
+  <a class="nav-link" href="#pet-overview"><span class="nav-icon">🐾</span>Pet Architecture</a>
+  <a class="nav-link" href="#stats"><span class="nav-icon">💚</span>Stats &amp; Decay</a>
+  <a class="nav-link" href="#mood-engine"><span class="nav-icon">😄</span>Mood Engine</a>
+  <a class="nav-link" href="#bond"><span class="nav-icon">💜</span>Bond Engine</a>
+  <a class="nav-link" href="#evolution"><span class="nav-icon">✨</span>Evolution Ritual</a>
+  <a class="nav-link" href="#pet-room"><span class="nav-icon">🏡</span>Pet Room UI</a>
+
+  <div class="nav-group">SAFETY &amp; COMPLIANCE</div>
+  <a class="nav-link" href="#privacy-coppa"><span class="nav-icon">🔒</span>Privacy &amp; COPPA</a>
+  <a class="nav-link" href="#accessibility"><span class="nav-icon">♿</span>Accessibility</a>
+  <a class="nav-link" href="#analytics"><span class="nav-icon">📊</span>Analytics</a>
+</nav>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-title">Monster Catcher<br/>Design Guide</div>
+    <div class="hero-sub">FOR CLAUDE CODE · ANDROID · KOTLIN 2.0 · JETPACK COMPOSE</div>
+    <div class="hero-desc">
+      This document is the single source of truth for building the AR filter pipeline
+      and modernised Tamagotchi pet system. Two visual worlds. One coherent product.
+      Ghostbusters-grade capture. "If"-grade emotional care.
+    </div>
+    <div class="hero-pills">
+      <span class="badge badge-lime">Snapchat-Style AR Filters</span>
+      <span class="badge badge-lav">Tamagotchi Pet System</span>
+      <span class="badge badge-cyan">Ghostbusters × "If"</span>
+      <span class="badge badge-gold">Android · Min SDK 26</span>
+      <span class="badge badge-peach">Kids &amp; Families · COPPA</span>
+      <span class="badge badge-red">Privacy · Accessibility · Compliance</span>
+    </div>
+  </div>
+
+  <section id="overview">
+    <div class="section-eyebrow">00 · OVERVIEW</div>
+    <div class="section-title">Project Brief</div>
+    <div class="section-sub">WHAT WE ARE BUILDING AND WHY IT MATTERS</div>
+    <div class="section-rule"></div>
+
+    <div class="grid-2 mb-32">
+      <div class="card card-accent card-lime">
+        <h3>📷 AR Filter System</h3>
+        <p>Snapchat-quality lenses built from scratch using custom GLSL fragment shaders, CameraX, ARCore, and MediaPipe Face Landmarker. No third-party lens SDK — full design control, no licensing fees, no child-data leakage.</p>
+      </div>
+      <div class="card card-accent card-lav">
+        <h3>🐾 Pet System</h3>
+        <p>A modernised Tamagotchi where captured monsters become emotional companions. Inspired by the "If" film. Soft, expressive, never punishing — no death mechanic.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="design-philosophy">
+    <div class="section-eyebrow">01 · PHILOSOPHY</div>
+    <div class="section-title">Design Philosophy</div>
+    <div class="section-sub">PRINCIPLES EVERY SCREEN MUST HONOUR</div>
+    <div class="section-rule"></div>
+
+    <div class="grid-3 mb-24">
+      <div class="card"><h4 class="text-lime">WHIMSICAL · NOT CHILDISH</h4><p>Playful with craft. Surprising details. Every interaction has personality.</p></div>
+      <div class="card"><h4 class="text-cyan">DARK-SAFE FIRST</h4><p>Kids hunt monsters at night. All UI readable at max darkness. OLED-friendly.</p></div>
+      <div class="card"><h4 class="text-lav">NO DEATH, NO PUNISHMENT</h4><p>Monsters are immortal friends. Low stats = sad moods, not loss.</p></div>
+      <div class="card"><h4 class="text-gold">KIDS-FIRST ACCESSIBILITY</h4><p>48×48dp minimum. No spoiler screen-reading. Haptic feedback everywhere.</p></div>
+      <div class="card"><h4 class="text-peach">EMOTIONAL EXPRESSIVENESS</h4><p>Bond is the reward. Every interaction confirms the monster felt it.</p></div>
+      <div class="card"><h4 class="text-lime">PERFORMANCE IS DESIGN</h4><p>≤16ms/frame on Tier B. Fallbacks first-class, not afterthoughts.</p></div>
+    </div>
+  </section>
+
+  <section id="colors">
+    <div class="section-eyebrow">02 · VISUAL SYSTEM</div>
+    <div class="section-title">Color System</div>
+    <div class="section-sub">CAPTURE PALETTE · PET PALETTE · SEMANTIC TOKENS</div>
+    <div class="section-rule"></div>
+
+    <h4>👻 CAPTURE MODE — GHOSTBUSTERS</h4>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:32px;">
+      <div class="swatch"><div class="swatch-color" style="background:#7FFF00;"></div><div class="swatch-info"><div class="swatch-hex">#7FFF00</div><div class="swatch-name">Slime Green</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#00F5FF;"></div><div class="swatch-info"><div class="swatch-hex">#00F5FF</div><div class="swatch-name">Ecto Cyan</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#FF6B6B;"></div><div class="swatch-info"><div class="swatch-hex">#FF6B6B</div><div class="swatch-name">Alert Red</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#FFD700;"></div><div class="swatch-info"><div class="swatch-hex">#FFD700</div><div class="swatch-name">Rarity Gold</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#FF9F43;"></div><div class="swatch-info"><div class="swatch-hex">#FF9F43</div><div class="swatch-name">Beam Orange</div></div></div>
+    </div>
+
+    <h4>💜 PET MODE — "IF" PALETTE</h4>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:32px;">
+      <div class="swatch"><div class="swatch-color" style="background:#FFB347;"></div><div class="swatch-info"><div class="swatch-hex">#FFB347</div><div class="swatch-name">Peach</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#C77DFF;"></div><div class="swatch-info"><div class="swatch-hex">#C77DFF</div><div class="swatch-name">Lavender</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#A8EDCA;"></div><div class="swatch-info"><div class="swatch-hex">#A8EDCA</div><div class="swatch-name">Mint Fresh</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#EAF4FB;"></div><div class="swatch-info"><div class="swatch-hex">#EAF4FB</div><div class="swatch-name">Cloud White</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#FFD6E7;"></div><div class="swatch-info"><div class="swatch-hex">#FFD6E7</div><div class="swatch-name">Blush</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#FFF3B0;"></div><div class="swatch-info"><div class="swatch-hex">#FFF3B0</div><div class="swatch-name">Butter</div></div></div>
+    </div>
+  </section>
+
+  <section id="typography">
+    <div class="section-eyebrow">02.1 · VISUAL SYSTEM</div>
+    <div class="section-title">Typography</div>
+    <div class="section-sub">THREE FONTS · STRICT ROLE ASSIGNMENTS</div>
+    <div class="section-rule"></div>
+
+    <div class="grid-3 mb-24">
+      <div class="card">
+        <div style="font-family:'Fredoka One',cursive;font-size:28px;color:var(--lime);margin-bottom:8px;">Fredoka One</div>
+        <div class="badge badge-lime mb-8">DISPLAY</div>
+        <p>Monster names, section titles, mood labels, CTAs.</p>
+      </div>
+      <div class="card">
+        <div style="font-family:'Space Mono',monospace;font-size:18px;color:var(--cyan);margin-bottom:8px;">Space Mono</div>
+        <div class="badge badge-cyan mb-8">SYSTEM</div>
+        <p>Stats, filter names, shader labels, badges, HUD.</p>
+      </div>
+      <div class="card">
+        <div style="font-family:'Outfit',sans-serif;font-size:18px;color:var(--text);margin-bottom:8px;">Outfit</div>
+        <div class="badge badge-lav mb-8">BODY</div>
+        <p>Body text, descriptions, instructions, accessibility.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="motion">
+    <div class="section-eyebrow">02.2 · VISUAL SYSTEM</div>
+    <div class="section-title">Motion &amp; Haptics</div>
+    <div class="section-sub">ANIMATIONS · HAPTIC PATTERNS · LOTTIE INTEGRATION</div>
+    <div class="section-rule"></div>
+
+    <div class="callout callout-lav">
+      <span class="callout-emoji">🎵</span>
+      <div>
+        <div class="callout-label text-lav">LOTTIE RULES</div>
+        <div class="callout-body">All idle animations use <code>iterations = LottieConstants.IterateForever</code>. Triggered animations play once then return to idle via <code>isPlaying</code> state tracking. Bundle all Lottie JSON in <code>assets/pet/moods/</code> — no remote loading.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ar-overview">
+    <div class="section-eyebrow">03 · AR FILTER SYSTEM</div>
+    <div class="section-title">Filter Architecture</div>
+    <div class="section-sub">COMPOSABLE GLSL PIPELINE · ARCORE · CAMERAX · MEDIAPIPE</div>
+    <div class="section-rule"></div>
+
+    <div class="callout callout-lime">
+      <span class="callout-emoji">⚙️</span>
+      <div>
+        <div class="callout-label text-lime">PIPELINE FLOW</div>
+        <div class="callout-body"><code>CameraX</code> → <code>ARCore</code> → <code>MediaPipe FaceLandmarker</code> → <code>UniformBus</code> → <code>FilterLayerManager</code> → <code>OpenGL ES 3.0 FBO chain</code> → Display</div>
+      </div>
+    </div>
+
+    <div class="grid-2 mb-24">
+      <div class="card card-accent card-lime">
+        <h4>FilterLayerManager</h4>
+        <p>Maintains active shader stack as ordered List&lt;FilterLayer&gt;. Stack ordered cheapest → most expensive for Tier B fallback.</p>
+      </div>
+      <div class="card card-accent card-cyan">
+        <h4>UniformBus</h4>
+        <p>StateFlow-backed data channel feeding real-time values into GLSL uniforms. Never query MediaPipe from GL thread.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="filter-catalog">
+    <div class="section-eyebrow">03.1 · AR FILTER SYSTEM</div>
+    <div class="section-title">Filter Catalog</div>
+    <div class="section-sub">9 COMPOSABLE FILTERS · CAPTURE MODE</div>
+    <div class="section-rule"></div>
+
+    <table class="mb-24">
+      <thead><tr><th>FILTER</th><th>COST</th><th>TIERS</th><th>PURPOSE</th></tr></thead>
+      <tbody>
+        <tr><td>Proton Beam Glow</td><td>1 FBO</td><td>A/B</td><td>Touch-held radial beam with chromatic aberration</td></tr>
+        <tr><td>Slime Vignette</td><td>0 FBO</td><td>A/B/C</td><td>Composited into Proton Beam at zero cost</td></tr>
+        <tr><td>Night Vision</td><td>1 FBO</td><td>A/B</td><td>Auto-triggers at lux &lt; 3.0</td></tr>
+        <tr><td>Ghost Radar HUD</td><td>0 FBO</td><td>A/B/C</td><td>Compose Canvas overlay, zero GL cost</td></tr>
+        <tr><td>Ectoplasm Splatter</td><td>1 FBO</td><td>A/B</td><td>Capture success one-shot, auto-removes</td></tr>
+        <tr><td>Ghost Goggles</td><td>1 FBO</td><td>A only</td><td>MediaPipe face mesh anchor to eyes</td></tr>
+        <tr><td>Proton Pack HUD Visor</td><td>1 FBO</td><td>A only</td><td>Forehead HUD overlay</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="perf-budget">
+    <div class="section-eyebrow">03.4 · AR FILTER SYSTEM</div>
+    <div class="section-title">Performance Budget</div>
+    <div class="section-sub">DEVICE TIERS · FBO LIMITS · TARGET FRAME TIMES</div>
+    <div class="section-rule"></div>
+
+    <table>
+      <thead><tr><th>TIER</th><th>DEVICE</th><th>MAX FBO</th><th>FACE MESH</th><th>TARGET</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>Pixel 7+</td><td>6 passes</td><td>✅ 30fps</td><td>≤10ms</td></tr>
+        <tr><td>B</td><td>Pixel 6a, Samsung A54</td><td>2 passes</td><td>❌ Disabled</td><td>≤16ms</td></tr>
+        <tr><td>C</td><td>Older / Low-RAM</td><td>0 passes</td><td>❌ Disabled</td><td>Lottie fallback</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="pet-overview">
+    <div class="section-eyebrow">04 · PET SYSTEM</div>
+    <div class="section-title">Pet Architecture</div>
+    <div class="section-sub">MODERNISED TAMAGOTCHI · IMMORTAL COMPANIONS</div>
+    <div class="section-rule"></div>
+
+    <div class="callout callout-lav">
+      <span class="callout-emoji">💜</span>
+      <div>
+        <div class="callout-label text-lav">DESIGN HEART</div>
+        <div class="callout-body">In "If", imaginary friends are forgotten because people stop believing. Our system inverts this — bond is designed so you can never lose the relationship. Bond never decreases. Monsters never die. Low stats = sad moods, not loss.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stats">
+    <div class="section-eyebrow">04.1 · PET SYSTEM</div>
+    <div class="section-title">Stats &amp; Decay</div>
+    <div class="section-sub">5 STATS · WORKMANAGER DECAY · NO DEATH MECHANIC</div>
+    <div class="section-rule"></div>
+
+    <table>
+      <thead><tr><th>STAT</th><th>RANGE</th><th>DECAY</th><th>CRITICAL</th></tr></thead>
+      <tbody>
+        <tr><td>Hunger</td><td>0–100</td><td>-5 every 4h</td><td>&lt;20 → GRUMBLY</td></tr>
+        <tr><td>Happiness</td><td>0–100</td><td>-4 every 6h</td><td>&lt;25 → LONELY</td></tr>
+        <tr><td>Energy</td><td>0–100</td><td>Reset at midnight</td><td>&lt;20 → SLEEPY</td></tr>
+        <tr><td>Spookiness</td><td>0–100</td><td>No decay</td><td>&gt;85 → SPOOKED</td></tr>
+        <tr><td>Trust</td><td>0–100</td><td>No decay</td><td>Gates Bond</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="mood-engine">
+    <div class="section-eyebrow">04.2 · PET SYSTEM</div>
+    <div class="section-title">Mood Engine</div>
+    <div class="section-sub">8 MOOD STATES · PRIORITY DRIVEN · LOTTIE ANIMATIONS</div>
+    <div class="section-rule"></div>
+
+    <table>
+      <thead><tr><th>MOOD</th><th>PRIORITY</th><th>CONDITION</th><th>ANIMATION</th></tr></thead>
+      <tbody>
+        <tr><td>MISSING_YOU</td><td>1 (HIGHEST)</td><td>7+ days inactive</td><td>idle_missing_you_loop.json</td></tr>
+        <tr><td>GRUMBLY</td><td>2</td><td>hunger &lt; 20</td><td>idle_grumbly_loop.json</td></tr>
+        <tr><td>LONELY</td><td>3</td><td>happiness &lt; 25</td><td>idle_lonely_loop.json</td></tr>
+        <tr><td>SLEEPY</td><td>4</td><td>energy &lt; 20</td><td>idle_sleepy_loop.json</td></tr>
+        <tr><td>SPOOKED</td><td>5</td><td>spookiness &gt; 85</td><td>idle_spooked_loop.json</td></tr>
+        <tr><td>BONDED</td><td>6</td><td>bond level ≥ 8</td><td>idle_bonded_loop.json</td></tr>
+        <tr><td>ECSTATIC</td><td>7</td><td>all stats &gt; 80</td><td>idle_ecstatic_loop.json</td></tr>
+        <tr><td>CONTENT</td><td>8</td><td>default</td><td>idle_happy_loop.json</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="bond">
+    <div class="section-eyebrow">04.3 · PET SYSTEM</div>
+    <div class="section-title">Bond Engine</div>
+    <div class="section-sub">BOND 0→10 · PERMANENT · GATES INTERACTIONS</div>
+    <div class="section-rule"></div>
+
+    <table>
+      <thead><tr><th>LEVEL</th><th>LABEL</th><th>UNLOCKED</th></tr></thead>
+      <tbody>
+        <tr><td>0–2</td><td>Wary</td><td>Feed, Watch</td></tr>
+        <tr><td>3–4</td><td>Curious</td><td>+ Play, Name assignment</td></tr>
+        <tr><td>5–6</td><td>Friendly</td><td>+ Cuddle, Habitat customisation</td></tr>
+        <tr><td>7</td><td>Close Friend</td><td>+ Secret ability</td></tr>
+        <tr><td>8–9</td><td>Lifelong</td><td>+ BONDED mood state</td></tr>
+        <tr><td>10</td><td>Soul Bond</td><td>Shared evolution burst</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="evolution">
+    <div class="section-eyebrow">04.4 · PET SYSTEM</div>
+    <div class="section-title">Evolution Ritual</div>
+    <div class="section-sub">3-STAGE · BOND-GATED · 8-SECOND EMOTIONAL CENTREPIECE</div>
+    <div class="section-rule"></div>
+
+    <table>
+      <thead><tr><th>STAGE</th><th>TRIGGER</th><th>LOOK</th></tr></thead>
+      <tbody>
+        <tr><td>Hatchling (Stage 1)</td><td>Bond 0</td><td>Wary, spooky, round, huddled</td></tr>
+        <tr><td>Familiar (Stage 2)</td><td>Trust ≥ 40</td><td>Personality emerging, colour saturates</td></tr>
+        <tr><td>Companion (Stage 3)</td><td>Trust ≥ 80 + Bond ≥ 4</td><td>Full personality, unique ability, vibrant</td></tr>
+      </tbody>
+    </table>
+
+    <h4>8-SECOND RITUAL SEQUENCE</h4>
+    <table>
+      <thead><tr><th>TIME</th><th>PHASE</th><th>VISUAL</th><th>HAPTIC</th></tr></thead>
+      <tbody>
+        <tr><td>0–2s</td><td>Ghostbusters Surge</td><td>Proton green floods. PKE meter animation.</td><td>Escalation waveform</td></tr>
+        <tr><td>2–4s</td><td>Energy Peak</td><td>White flash. Silhouette visible.</td><td>Strong thud</td></tr>
+        <tr><td>4–6s</td><td>"If" Bloom</td><td>Lavender aura, peach, mint sparkles. Soundtrack shift.</td><td>Gentle</td></tr>
+        <tr><td>6–8s</td><td>Reveal</td><td>New form revealed. Name card. Confetti.</td><td>Triple pulse</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="pet-room">
+    <div class="section-eyebrow">04.5 · PET SYSTEM</div>
+    <div class="section-title">Pet Room UI</div>
+    <div class="section-sub">SPOOKINESS-ADAPTIVE PALETTE · LOTTIE IDLE LOOPS</div>
+    <div class="section-rule"></div>
+
+    <div class="grid-2 mb-24">
+      <div class="card">
+        <div class="badge badge-lav mb-8">LOW SPOOKINESS</div>
+        <p>Peach walls. Lavender glow. Soft cushions. Sparkles. Butter-yellow warm lighting. Imaginary-friend bedroom.</p>
+      </div>
+      <div class="card">
+        <div class="badge badge-lime mb-8">HIGH SPOOKINESS</div>
+        <p>Dark containment-unit aesthetic. Proton green ambient. PKE furniture. Mystery particles. Maximum spook.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy-coppa">
+    <div class="section-eyebrow">06 · SAFETY &amp; COMPLIANCE</div>
+    <div class="section-title">Privacy &amp; COPPA</div>
+    <div class="section-sub">PARENTAL CONSENT · DATA MINIMISATION · LEGAL REQUIREMENTS</div>
+    <div class="section-rule"></div>
+
+    <div class="callout callout-red">
+      <span class="callout-emoji">⚖️</span>
+      <div>
+        <div class="callout-label" style="color:var(--red);">COPPA — NON-NEGOTIABLE</div>
+        <div class="callout-body">COPPA applies to users under 13. Verifiable parental consent required before any data collection. Build the consent gate on day one.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="accessibility">
+    <div class="section-eyebrow">06.2 · SAFETY &amp; COMPLIANCE</div>
+    <div class="section-title">Accessibility</div>
+    <div class="section-sub">WCAG 2.1 AA · CONTRAST · FONT SCALING · TALKBACK</div>
+    <div class="section-rule"></div>
+
+    <div class="callout callout-lime">
+      <span class="callout-emoji">♿</span>
+      <div>
+        <div class="callout-label text-lime">TARGET STANDARD</div>
+        <div class="callout-body">WCAG 2.1 Level AA for all interactive content. Android Accessibility Test Framework (ATF) zero critical errors before release.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="analytics">
+    <div class="section-eyebrow">06.4 · SAFETY &amp; COMPLIANCE</div>
+    <div class="section-title">Analytics &amp; Telemetry</div>
+    <div class="section-sub">ALLOWED EVENTS · PII BAN · RETENTION WINDOWS</div>
+    <div class="section-rule"></div>
+
+    <div class="callout callout-red">
+      <span class="callout-emoji">🚫</span>
+      <div>
+        <div class="callout-label" style="color:var(--red);">DEFAULT: ANALYTICS OFF FOR CHILDREN</div>
+        <div class="callout-body">No analytics event fires until parent explicitly opts in. AnalyticsGate checks consent before every event dispatch.</div>
+      </div>
+    </div>
+  </section>
+
+  <div style="margin-top:40px;padding:20px;background:rgba(127,255,0,0.04);border:1px solid rgba(127,255,0,0.15);border-radius:12px;text-align:center;">
+    <div style="font-family:var(--ff-display);font-size:20px;color:var(--lime);margin-bottom:6px;">👾 Monster Catcher Design Guide</div>
+    <div style="font-family:var(--ff-mono);font-size:8px;color:var(--dim);letter-spacing:0.2em;">ANDROID · KOTLIN 2.0 · JETPACK COMPOSE · GHOSTBUSTERS × "IF"</div>
+    <div style="font-size:11px;color:var(--dim);margin-top:10px;">For detailed implementation specs, refer to DESIGN_GUIDE.md</div>
+  </div>
+
+</main>
+</div>
+
+</body>
+</html>
