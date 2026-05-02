@@ -1,0 +1,6 @@
+services:
+  nightcatchers:
+    image: nightcatchers
+    build:
+      context: .
+      dockerfile: ./Dockerfile
