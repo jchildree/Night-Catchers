@@ -7,6 +7,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
+import com.nightcatchers.feature.onboarding.OnboardingScreen
+import com.nightcatchers.feature.parental.ParentalDashboardScreen
+import com.nightcatchers.feature.parental.PinGateScreen
 import com.nightcatchers.feature.pet.PetRoomScreen
 import com.nightcatchers.feature.vault.VaultScreen
 
@@ -25,7 +28,13 @@ fun NightCatchersNavGraph(
         }
 
         composable<Dest.Onboarding> {
-            // OnboardingScreen
+            OnboardingScreen(
+                onNavigateToHome = {
+                    navController.navigate(Dest.Home) {
+                        popUpTo(Dest.Onboarding) { inclusive = true }
+                    }
+                },
+            )
         }
 
         composable<Dest.Home> {
@@ -107,10 +116,18 @@ fun NightCatchersNavGraph(
                 // SettingsScreen
             }
             composable<Dest.SettingsParent> {
-                // ParentalDashboardScreen
+                PinGateScreen(
+                    onPinVerified = {
+                        navController.navigate(Dest.SettingsParentTime) {
+                            launchSingleTop = true
+                        }
+                    },
+                )
             }
             composable<Dest.SettingsParentTime> {
-                // ScreenTimeSettingsScreen
+                ParentalDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
             }
         }
     }

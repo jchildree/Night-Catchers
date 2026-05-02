@@ -215,6 +215,7 @@ private fun MonsterAvatarSection(state: PetUiState.Ready) {
             MonsterAvatar(
                 emoji = state.emoji,
                 size = 120.dp,
+                mood = state.mood,
                 isAnimated = !state.isInteracting,
             )
             if (state.isInteracting) {

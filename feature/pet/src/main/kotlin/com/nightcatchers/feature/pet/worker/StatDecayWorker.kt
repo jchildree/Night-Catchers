@@ -9,16 +9,17 @@ import com.nightcatchers.core.domain.repository.MonsterRepository
 import com.nightcatchers.core.domain.repository.PetRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
 
 /**
  * Runs on WorkManager's 4-hour cadence.
- * Applies decay to all active (non-released) monsters per the stat decay table (section 18):
- *   Hunger      -4 pts per tick (25pts/4h)
- *   Happiness   -3 pts per tick (15pts/6h — approximated to same tick)
- *   Energy      -2 pts per tick (20pts/8h — approximated)
- *   Spookiness  +1 pt per tick  (+10pts/12h — approximated)
- * Trust never decays via this worker; a separate 24h worker handles trust drift.
+ * Applies decay to all active (non-released) monsters per the stat decay table:
+ *   Hunger      -4 pts per tick
+ *   Happiness   -3 pts per tick
+ *   Energy      -2 pts per tick
+ *   Spookiness  +1 pt per tick
+ * Trust never decays.
  */
 @HiltWorker
 class StatDecayWorker @AssistedInject constructor(
@@ -30,9 +31,10 @@ class StatDecayWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         return try {
-            val monsters = monsterRepository.observeAll()
-            // Flow is cold — collect once via a snapshot approach:
-            // (In production, use a one-shot suspend query on MonsterDao directly)
+            val activeMonsters = monsterRepository.observeAll().first().filter { !it.isReleased }
+            activeMonsters.forEach { monster ->
+                runCatching { petRepository.applyDecay(monster.id) }
+            }
             Result.success()
         } catch (e: Exception) {
             Result.retry()
