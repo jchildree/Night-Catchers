@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dex_title">Monster Dex</string>
+    <string name="dex_subtitle">Capture monsters to fill your Dex</string>
+</resources>

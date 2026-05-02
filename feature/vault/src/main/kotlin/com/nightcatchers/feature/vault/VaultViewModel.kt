@@ -43,7 +43,8 @@ class VaultViewModel @Inject constructor(
                 mood = getMoodState(petState.stats),
             )
         }
-        VaultUiState.Ready(entries = entries, pendingReleaseId = pendingId)
+        val readyState: VaultUiState = VaultUiState.Ready(entries = entries, pendingReleaseId = pendingId)
+        readyState
     }
         .catch { emit(VaultUiState.Error(it.message ?: "Unknown error")) }
         .stateIn(

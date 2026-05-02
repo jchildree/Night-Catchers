@@ -50,6 +50,4 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.appcheck.playintegrity)
     debugImplementation(libs.firebase.appcheck.debug)
-
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
 }
