@@ -50,7 +50,6 @@ import com.nightcatchers.core.domain.model.Rarity
 import com.nightcatchers.core.ui.component.MonsterAvatar
 import com.nightcatchers.core.ui.theme.DeepNight
 import com.nightcatchers.core.ui.theme.PetRoomBgTop
-import com.nightcatchers.core.ui.theme.RarityColor
 import com.nightcatchers.core.ui.theme.RarityCommon
 import com.nightcatchers.core.ui.theme.RarityGold
 import com.nightcatchers.core.ui.theme.RarityLegendary
