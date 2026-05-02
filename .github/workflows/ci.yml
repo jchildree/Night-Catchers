@@ -41,9 +41,18 @@ jobs:
         run: |
           cat > app/google-services.json << 'EOF'
           {
-            "project_info": { "project_id": "night-catchers-placeholder", "project_number": "000000000000" },
+            "project_info": {
+              "project_id": "night-catchers-placeholder",
+              "project_number": "000000000000",
+              "storage_bucket": "night-catchers-placeholder.appspot.com"
+            },
             "client": [{
-              "client_info": { "mobilesdk_app_id": "1:000000000000:android:placeholder" },
+              "client_info": {
+                "mobilesdk_app_id": "1:000000000000:android:placeholder",
+                "android_client_info": { "package_name": "com.nightcatchers.app" }
+              },
+              "oauth_client": [],
+              "api_key": [{ "current_key": "placeholder" }],
               "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
             }],
             "configuration_version": "1"
