@@ -6,6 +6,9 @@ plugins {
 
 android {
     namespace = "com.nightcatchers.core.network"
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
