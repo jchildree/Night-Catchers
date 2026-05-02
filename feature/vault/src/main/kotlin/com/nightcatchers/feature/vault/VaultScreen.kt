@@ -55,6 +55,7 @@ import com.nightcatchers.core.ui.theme.SurfaceDark
 @Composable
 fun VaultScreen(
     onNavigateToPet: (monsterId: String) -> Unit,
+    onNavigateToDetail: (monsterId: String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: VaultViewModel = hiltViewModel(),
 ) {
@@ -81,7 +82,7 @@ fun VaultScreen(
             is VaultUiState.Ready -> {
                 VaultContent(
                     state = s,
-                    onNavigateToPet = onNavigateToPet,
+                    onNavigateToDetail = onNavigateToDetail,
                     onRequestRelease = viewModel::requestRelease,
                 )
 
@@ -103,7 +104,7 @@ fun VaultScreen(
 @Composable
 private fun VaultContent(
     state: VaultUiState.Ready,
-    onNavigateToPet: (String) -> Unit,
+    onNavigateToDetail: (String) -> Unit,
     onRequestRelease: (String) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -125,7 +126,7 @@ private fun VaultContent(
                 ) { entry ->
                     MonsterCard(
                         entry = entry,
-                        onClick = { onNavigateToPet(entry.monster.id) },
+                        onClick = { onNavigateToDetail(entry.monster.id) },
                         onLongClick = { onRequestRelease(entry.monster.id) },
                     )
                 }
