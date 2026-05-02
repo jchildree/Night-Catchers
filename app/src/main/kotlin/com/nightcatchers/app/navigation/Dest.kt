@@ -27,6 +27,7 @@ sealed interface Dest {
 
     // ── Dex nested graph ──
     @Serializable object Dex : Dest
+    @Serializable data class DexDetail(val archetypeId: String) : Dest
     @Serializable data class DexAchievement(val achievementId: String) : Dest
     @Serializable data class DexShare(val monsterId: String) : Dest
 

@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":feature:ar"))
     implementation(project(":feature:filters"))
 
+    implementation(libs.camerax.view)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.hilt.navigation.compose)
