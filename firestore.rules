@@ -1,0 +1,77 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isParent(parentUid) {
+      return isSignedIn() && request.auth.uid == parentUid;
+    }
+
+    function noGpsInWrite() {
+      // COPPA: captureLatLng must never be written to Firestore.
+      return !request.resource.data.keys().hasAny(['captureLatLng']);
+    }
+
+    // ── Parent profile ────────────────────────────────────────────────────
+    // Parents can read/write only their own profile document.
+
+    match /parents/{parentUid} {
+      allow read, write: if isParent(parentUid);
+    }
+
+    // ── Monster vault ─────────────────────────────────────────────────────
+    // Only the owning parent can read or write their child's monsters.
+    // GPS coordinates are explicitly banned from writes (COPPA).
+
+    match /parents/{parentUid}/monsters/{monsterId} {
+      allow read: if isParent(parentUid);
+      allow create, update: if isParent(parentUid) && noGpsInWrite();
+      allow delete: if isParent(parentUid);
+    }
+
+    // ── Pet state ─────────────────────────────────────────────────────────
+
+    match /parents/{parentUid}/petStates/{monsterId} {
+      allow read: if isParent(parentUid);
+      allow create, update: if isParent(parentUid) && noGpsInWrite();
+      allow delete: if isParent(parentUid);
+    }
+
+    // ── Pending shares ────────────────────────────────────────────────────
+    // A parent can create a share for their own monster.
+    // The recipient can read a share addressed to them.
+    // Only the originating parent can delete/expire their own share.
+
+    match /shares/{shareId} {
+      allow create: if isSignedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && noGpsInWrite();
+      allow read: if isSignedIn()
+        && (resource.data.ownerUid == request.auth.uid
+            || resource.data.recipientUid == request.auth.uid);
+      allow delete: if isSignedIn()
+        && resource.data.ownerUid == request.auth.uid;
+      allow update: if false; // shares are immutable once created
+    }
+
+    // ── Audit log ────────────────────────────────────────────────────────
+    // Append-only from authenticated parents; no client deletes or updates.
+
+    match /parents/{parentUid}/auditLog/{eventId} {
+      allow create: if isParent(parentUid) && noGpsInWrite();
+      allow read: if isParent(parentUid);
+      allow update, delete: if false;
+    }
+
+    // ── Default deny ─────────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

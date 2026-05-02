@@ -60,6 +60,26 @@ class CameraManager @Inject constructor() {
         )
     }
 
+    fun startPreviewOnly(
+        context: Context,
+        lifecycleOwner: LifecycleOwner,
+        previewView: PreviewView,
+    ) {
+        val future = ProcessCameraProvider.getInstance(context)
+        future.addListener({
+            cameraProvider = future.get()
+            val preview = Preview.Builder().build().also {
+                it.surfaceProvider = previewView.surfaceProvider
+            }
+            cameraProvider?.unbindAll()
+            cameraProvider?.bindToLifecycle(
+                lifecycleOwner,
+                CameraSelector.DEFAULT_BACK_CAMERA,
+                preview,
+            )
+        }, ContextCompat.getMainExecutor(context))
+    }
+
     fun release() {
         cameraProvider?.unbindAll()
         cameraProvider = null

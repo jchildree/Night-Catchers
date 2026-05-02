@@ -8,5 +8,6 @@ interface UserRepository {
     suspend fun getUserProfile(): UserProfile?
     suspend fun saveUserProfile(profile: UserProfile)
     suspend fun verifyPin(rawPin: String): Boolean
+    suspend fun createPin(rawPin: String)
     suspend fun clearSession()
 }

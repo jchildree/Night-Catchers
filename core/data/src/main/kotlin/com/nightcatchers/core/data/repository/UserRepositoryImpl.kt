@@ -35,6 +35,12 @@ class UserRepositoryImpl @Inject constructor(
         BCrypt.verifyer().verify(rawPin.toCharArray(), profile.pinHash).verified
     }
 
+    override suspend fun createPin(rawPin: String): Unit = withContext(ioDispatcher) {
+        val profile = dao.getProfile() ?: return@withContext
+        val hash = BCrypt.withDefaults().hashToString(12, rawPin.toCharArray())
+        dao.insert(profile.copy(pinHash = hash))
+    }
+
     override suspend fun clearSession(): Unit = withContext(ioDispatcher) {
         dao.clear()
     }
