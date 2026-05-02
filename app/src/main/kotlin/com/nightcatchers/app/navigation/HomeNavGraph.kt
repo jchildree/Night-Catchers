@@ -29,7 +29,7 @@ import com.nightcatchers.feature.parental.ParentalDashboardScreen
 import com.nightcatchers.feature.parental.PinGateScreen
 import com.nightcatchers.feature.pet.PetRoomScreen
 import com.nightcatchers.feature.vault.MonsterDetailScreen
-import com.nightcatchers.feature.vault.VaultScreen
+import com.nightcatchers.feature.dex.DexScreen
 
 /**
  * Inner NavHost for the 5-tab home area.
@@ -125,11 +125,7 @@ fun HomeNavGraph(
         // ── Dex tab ────────────────────────────────────────────────────────
         navigation<Dest.Dex>(startDestination = Dest.Dex) {
             composable<Dest.Dex> {
-                PlaceholderScreen(
-                    emoji = "📖",
-                    label = "Monster Dex",
-                    subtitle = "Capture monsters to fill your Dex",
-                )
+                DexScreen()
             }
             composable<Dest.DexAchievement> { }
             composable<Dest.DexShare> { }

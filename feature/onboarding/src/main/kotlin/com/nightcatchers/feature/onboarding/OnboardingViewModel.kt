@@ -19,6 +19,7 @@ data class OnboardingState(
     val page: Int = 0,
     val childName: String = "",
     val cameraPermissionGranted: Boolean = false,
+    val notificationPermissionGranted: Boolean = false,
     val isSaving: Boolean = false,
 )
 
@@ -45,8 +46,12 @@ class OnboardingViewModel @Inject constructor(
         _state.update { it.copy(cameraPermissionGranted = granted) }
     }
 
+    fun onNotificationPermissionResult(granted: Boolean) {
+        _state.update { it.copy(notificationPermissionGranted = granted) }
+    }
+
     fun onNextPage() {
-        _state.update { it.copy(page = (it.page + 1).coerceAtMost(2)) }
+        _state.update { it.copy(page = (it.page + 1).coerceAtMost(3)) }
     }
 
     fun onComplete() {

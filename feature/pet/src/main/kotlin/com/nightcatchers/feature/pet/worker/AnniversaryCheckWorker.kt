@@ -1,9 +1,12 @@
 package com.nightcatchers.feature.pet.worker
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.PeriodicWorkRequestBuilder
@@ -56,6 +59,10 @@ class AnniversaryCheckWorker @AssistedInject constructor(
     }
 
     private fun postAnniversaryNotification(monsterId: String, monsterName: String, yearsAgo: Int) {
+        if (!hasNotificationPermission()) {
+            return
+        }
+
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         ensureChannel(nm)
 
@@ -69,6 +76,13 @@ class AnniversaryCheckWorker @AssistedInject constructor(
             .build()
 
         nm.notify(monsterId.hashCode(), notification)
+    }
+
+    private fun hasNotificationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun ensureChannel(nm: NotificationManager) {

@@ -57,7 +57,7 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 4 })
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -94,7 +94,12 @@ fun OnboardingScreen(
                         onPermissionResult = viewModel::onPermissionResult,
                         onNext = viewModel::onNextPage,
                     )
-                    2 -> NamePage(
+                    2 -> NotificationPermissionsPage(
+                        permissionGranted = state.notificationPermissionGranted,
+                        onPermissionResult = viewModel::onNotificationPermissionResult,
+                        onNext = viewModel::onNextPage,
+                    )
+                    3 -> NamePage(
                         childName = state.childName,
                         isSaving = state.isSaving,
                         onNameChange = viewModel::onNameChange,
@@ -104,7 +109,7 @@ fun OnboardingScreen(
             }
 
             PageIndicator(
-                pageCount = 3,
+                pageCount = 4,
                 currentPage = state.page,
                 modifier = Modifier.padding(bottom = 32.dp),
             )
@@ -141,6 +146,28 @@ private fun PermissionsPage(
         cta = if (permissionGranted) "Permission Granted ✓" else "Grant Camera Access",
         ctaEnabled = !permissionGranted,
         onCta = { launcher.launch(Manifest.permission.CAMERA) },
+        secondaryCta = if (permissionGranted) "Next" else null,
+        onSecondaryCta = if (permissionGranted) onNext else null,
+    )
+}
+
+@Composable
+private fun NotificationPermissionsPage(
+    permissionGranted: Boolean,
+    onPermissionResult: (Boolean) -> Unit,
+    onNext: () -> Unit,
+) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted -> onPermissionResult(granted) }
+
+    OnboardingPageScaffold(
+        emoji = "🔔",
+        title = "Anniversary Notifications",
+        subtitle = "Get notified when your monsters have anniversaries! We'll send gentle reminders about your special friends.",
+        cta = if (permissionGranted) "Permission Granted ✓" else "Allow Notifications",
+        ctaEnabled = !permissionGranted,
+        onCta = { launcher.launch(Manifest.permission.POST_NOTIFICATIONS) },
         secondaryCta = if (permissionGranted) "Next" else null,
         onSecondaryCta = if (permissionGranted) onNext else null,
     )

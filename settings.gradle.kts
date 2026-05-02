@@ -36,9 +36,10 @@ include(":core:testing")
 
 // Feature modules
 include(":feature:ar")
-include(":feature:filters")
 include(":feature:capture")
+include(":feature:dex")
+include(":feature:filters")
+include(":feature:onboarding")
+include(":feature:parental")
 include(":feature:pet")
 include(":feature:vault")
-include(":feature:parental")
-include(":feature:onboarding")

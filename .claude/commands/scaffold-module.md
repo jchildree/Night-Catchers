@@ -53,14 +53,14 @@ For **feature** modules:
 ```kotlin
 plugins {
     alias(libs.plugins.nightcatchers.android.feature)
-    alias(libs.plugins.nightcatchers.compose)
-    alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "$NAMESPACE"
 }
 ```
+
+The `nightcatchers.android.feature` convention plugin already applies `nightcatchers.compose` and `nightcatchers.hilt`, so you do not need to add Compose or Hilt plugin aliases manually.
 
 For **library** modules:
 ```kotlin

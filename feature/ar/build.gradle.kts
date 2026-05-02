@@ -25,6 +25,9 @@ dependencies {
     // ML Kit
     implementation("com.google.mlkit:object-detection:17.0.2")
 
+    // Guava for CameraX ListenableFuture
+    implementation("com.google.guava:guava:32.1.3-android")
+
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.hilt.navigation.compose)
