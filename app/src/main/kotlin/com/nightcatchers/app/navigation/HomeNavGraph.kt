@@ -23,6 +23,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.nightcatchers.core.ui.theme.DeepNight
 import com.nightcatchers.core.ui.theme.PetRoomBgTop
+import com.nightcatchers.feature.ar.ArScanScreen
 import com.nightcatchers.feature.capture.CaptureScreen
 import com.nightcatchers.feature.parental.ParentalDashboardScreen
 import com.nightcatchers.feature.parental.PinGateScreen
@@ -71,10 +72,12 @@ fun HomeNavGraph(
         // ── Scan tab ───────────────────────────────────────────────────────
         navigation<Dest.ScanCamera>(startDestination = Dest.ScanCamera) {
             composable<Dest.ScanCamera> {
-                PlaceholderScreen(
-                    emoji = "📷",
-                    label = "AR Scanner",
-                    subtitle = "Point your camera at a dark corner to find monsters",
+                ArScanScreen(
+                    onNavigateToCapture = {
+                        navController.navigate(Dest.ScanCapture("")) {
+                            launchSingleTop = true
+                        }
+                    },
                 )
             }
             composable<Dest.ScanCapture> { back ->
