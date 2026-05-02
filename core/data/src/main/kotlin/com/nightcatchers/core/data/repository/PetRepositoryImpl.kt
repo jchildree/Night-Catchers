@@ -89,6 +89,16 @@ class PetRepositoryImpl @Inject constructor(
                 trust = (stats.trust + 5).coerceAtMost(100),
                 energy = (stats.energy - 5).coerceAtLeast(0),
             )
+            PetInteraction.Comfort -> stats.copy(
+                happiness = (stats.happiness + 15).coerceAtMost(100),
+                spookiness = (stats.spookiness - 10).coerceAtLeast(0),
+                trust = (stats.trust + 6).coerceAtMost(100),
+                energy = (stats.energy - 5).coerceAtLeast(0),
+            )
+            PetInteraction.Praise -> stats.copy(
+                happiness = (stats.happiness + 12).coerceAtMost(100),
+                trust = (stats.trust + 4).coerceAtMost(100),
+            )
         }
 
 }

@@ -12,7 +12,7 @@ internal fun Project.configureAndroidCommon(extension: CommonExtension<*, *, *, 
         compileSdk = 35
 
         defaultConfig {
-            minSdk = 24
+            minSdk = 26
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
 
@@ -22,6 +22,8 @@ internal fun Project.configureAndroidCommon(extension: CommonExtension<*, *, *, 
             isCoreLibraryDesugaringEnabled = true
         }
     }
+
+    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.3")
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {

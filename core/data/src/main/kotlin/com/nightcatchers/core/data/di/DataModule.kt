@@ -23,8 +23,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
+import net.zetetic.database.sqlcipher.SQLiteDatabase
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import javax.inject.Singleton
 
 @Module
@@ -36,8 +36,8 @@ object DatabaseModule {
         @ApplicationContext context: Context,
         keyManager: DatabaseKeyManager,
     ): NightCatchersDatabase {
-        val passphrase = SQLiteDatabase.getBytes(keyManager.getOrCreatePassphrase())
-        val factory = SupportFactory(passphrase)
+        val passphrase = keyManager.getOrCreatePassphrase().concatToString().toByteArray(Charsets.UTF_8)
+        val factory = SupportOpenHelperFactory(passphrase)
         return Room.databaseBuilder(context, NightCatchersDatabase::class.java, "nightcatchers.db")
             .openHelperFactory(factory)
             .build()
