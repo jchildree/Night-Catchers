@@ -15,9 +15,12 @@ import javax.inject.Inject
 
 data class PinGateState(
     val digits: String = "",
+    val confirmDigits: String = "",
     val isVerifying: Boolean = false,
     val errorMessage: String? = null,
+    // true = verify existing PIN; false = create new PIN (two-step: enter then confirm)
     val hasPin: Boolean = true,
+    val awaitingConfirm: Boolean = false,
 )
 
 sealed interface PinGateEvent {
@@ -43,18 +46,39 @@ class PinGateViewModel @Inject constructor(
     }
 
     fun onDigit(digit: Char) {
-        val current = _state.value.digits
-        if (current.length >= 4) return
-        val next = current + digit
-        _state.update { it.copy(digits = next, errorMessage = null) }
-        if (next.length == 4) verify(next)
+        val s = _state.value
+        if (s.hasPin) {
+            if (s.digits.length >= 4) return
+            val next = s.digits + digit
+            _state.update { it.copy(digits = next, errorMessage = null) }
+            if (next.length == 4) verifyPin(next)
+        } else if (!s.awaitingConfirm) {
+            if (s.digits.length >= 4) return
+            val next = s.digits + digit
+            _state.update { it.copy(digits = next, errorMessage = null) }
+            if (next.length == 4) _state.update { it.copy(awaitingConfirm = true) }
+        } else {
+            if (s.confirmDigits.length >= 4) return
+            val next = s.confirmDigits + digit
+            _state.update { it.copy(confirmDigits = next, errorMessage = null) }
+            if (next.length == 4) confirmCreate(s.digits, next)
+        }
     }
 
     fun onDelete() {
-        _state.update { it.copy(digits = it.digits.dropLast(1), errorMessage = null) }
+        val s = _state.value
+        if (s.awaitingConfirm) {
+            _state.update { it.copy(confirmDigits = it.confirmDigits.dropLast(1), errorMessage = null) }
+        } else {
+            _state.update { it.copy(digits = it.digits.dropLast(1), errorMessage = null) }
+        }
     }
 
-    private fun verify(pin: String) {
+    fun onCancelConfirm() {
+        _state.update { it.copy(awaitingConfirm = false, digits = "", confirmDigits = "", errorMessage = null) }
+    }
+
+    private fun verifyPin(pin: String) {
         viewModelScope.launch {
             _state.update { it.copy(isVerifying = true) }
             val ok = runCatching { userRepository.verifyPin(pin) }.getOrDefault(false)
@@ -64,6 +88,28 @@ class PinGateViewModel @Inject constructor(
             } else {
                 _state.update { it.copy(isVerifying = false, digits = "", errorMessage = "Incorrect PIN") }
             }
+        }
+    }
+
+    private fun confirmCreate(newPin: String, confirm: String) {
+        if (newPin != confirm) {
+            _state.update {
+                it.copy(
+                    awaitingConfirm = false,
+                    digits = "",
+                    confirmDigits = "",
+                    errorMessage = "PINs don't match — try again",
+                )
+            }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isVerifying = true) }
+            runCatching { userRepository.createPin(newPin) }
+            _state.update {
+                it.copy(isVerifying = false, hasPin = true, digits = "", confirmDigits = "")
+            }
+            _events.send(PinGateEvent.PinVerified)
         }
     }
 }

@@ -61,21 +61,43 @@ fun PinGateScreen(
             modifier = Modifier.padding(horizontal = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(text = "🔒", fontSize = 48.sp)
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "Parent Area",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                color = Color.White,
-            )
-            Text(
-                text = "Enter your PIN to continue",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.6f),
-            )
-
-            Spacer(Modifier.height(32.dp))
-            PinDots(filled = state.digits.length)
+            if (!state.hasPin) {
+                // ── First-time PIN creation ──────────────────────────────────
+                Text(text = "🔐", fontSize = 48.sp)
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = if (state.awaitingConfirm) "Confirm PIN" else "Create Parent PIN",
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White,
+                )
+                Text(
+                    text = if (state.awaitingConfirm)
+                        "Enter the same PIN again to confirm"
+                    else
+                        "Choose a 4-digit PIN to protect the parent area",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(32.dp))
+                PinDots(filled = if (state.awaitingConfirm) state.confirmDigits.length else state.digits.length)
+            } else {
+                // ── Verify existing PIN ──────────────────────────────────────
+                Text(text = "🔒", fontSize = 48.sp)
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = "Parent Area",
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White,
+                )
+                Text(
+                    text = "Enter your PIN to continue",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.6f),
+                )
+                Spacer(Modifier.height(32.dp))
+                PinDots(filled = state.digits.length)
+            }
 
             state.errorMessage?.let { error ->
                 Spacer(Modifier.height(8.dp))
@@ -91,6 +113,12 @@ fun PinGateScreen(
                     onDigit = viewModel::onDigit,
                     onDelete = viewModel::onDelete,
                 )
+                if (state.awaitingConfirm) {
+                    Spacer(Modifier.height(8.dp))
+                    TextButton(onClick = viewModel::onCancelConfirm) {
+                        Text(text = "← Re-enter PIN", color = SoftLavender.copy(alpha = 0.7f))
+                    }
+                }
             }
         }
     }

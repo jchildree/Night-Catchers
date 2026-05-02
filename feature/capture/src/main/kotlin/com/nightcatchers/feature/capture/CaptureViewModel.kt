@@ -3,10 +3,13 @@ package com.nightcatchers.feature.capture
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nightcatchers.core.common.DeviceTier
+import com.nightcatchers.core.common.DeviceTierDetector
+import com.nightcatchers.core.domain.model.LensId
 import com.nightcatchers.core.domain.model.MonsterArchetype
+import com.nightcatchers.core.domain.model.MonsterArchetypeCatalog
 import com.nightcatchers.core.domain.usecase.CaptureMonsterUseCase
-import com.nightcatchers.feature.ar.ArUiState
-import com.nightcatchers.feature.ar.MonsterSpawnEngine
+import com.nightcatchers.feature.filters.FilterLayerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -18,10 +21,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CaptureViewModel @Inject constructor(
-    private val spawnEngine: MonsterSpawnEngine,
     private val captureMonsterUseCase: CaptureMonsterUseCase,
+    val filterLayerManager: FilterLayerManager,
+    private val tierDetector: DeviceTierDetector,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+
+    val deviceTier: DeviceTier by lazy { tierDetector.detect().tier }
+
+    private val archetypeId: String = savedStateHandle.get<String>("archetypeId") ?: ""
 
     private val _state = MutableStateFlow<CaptureState>(CaptureState.Idle)
     val state: StateFlow<CaptureState> = _state.asStateFlow()
@@ -29,38 +37,23 @@ class CaptureViewModel @Inject constructor(
     private var holdJob: Job? = null
 
     init {
-        observeSpawnEvents()
+        filterLayerManager.configure(deviceTier)
+        seedFromNavArg()
     }
 
-    private fun observeSpawnEvents() {
-        viewModelScope.launch {
-            spawnEngine.spawnEvents.collect { event ->
-                when (event) {
-                    is com.nightcatchers.feature.ar.MonsterSpawnEvent.MonsterDetected -> {
-                        if (_state.value is CaptureState.Idle || _state.value is CaptureState.Scanning) {
-                            _state.value = CaptureState.MonsterSpawned(
-                                archetype = event.archetype,
-                                anchorX = event.screenX,
-                                anchorY = event.screenY,
-                            )
-                        }
-                    }
-                    com.nightcatchers.feature.ar.MonsterSpawnEvent.Scanning -> {
-                        if (_state.value is CaptureState.Idle) {
-                            _state.value = CaptureState.Scanning
-                        }
-                    }
-                    com.nightcatchers.feature.ar.MonsterSpawnEvent.NoMonsterVisible -> {
-                        if (_state.value is CaptureState.Scanning) {
-                            _state.value = CaptureState.Idle
-                        }
-                    }
-                }
-            }
-        }
+    // Populate the initial state from the archetype ID passed via navigation.
+    // This avoids a SharedFlow race where CaptureViewModel subscribes after the
+    // MonsterDetected event was already emitted by MonsterSpawnEngine.
+    private fun seedFromNavArg() {
+        val archetype = MonsterArchetypeCatalog.findById(archetypeId) ?: return
+        filterLayerManager.push(LensId.PROTON_PACK)
+        _state.value = CaptureState.MonsterSpawned(
+            archetype = archetype,
+            anchorX = 0.5f,
+            anchorY = 0.5f,
+        )
     }
 
-    /** Called when the child presses and holds the beam on the monster. */
     fun onBeamHoldStart(archetype: MonsterArchetype, anchorX: Float, anchorY: Float) {
         holdJob?.cancel()
         holdJob = viewModelScope.launch {
@@ -81,7 +74,6 @@ class CaptureViewModel @Inject constructor(
         }
     }
 
-    /** Called when the child releases the beam before capture completes. */
     fun onBeamHoldRelease() {
         holdJob?.cancel()
         val current = _state.value
@@ -97,12 +89,19 @@ class CaptureViewModel @Inject constructor(
     private fun onCaptureComplete(archetype: MonsterArchetype) {
         viewModelScope.launch {
             val monster = captureMonsterUseCase(archetype)
+            filterLayerManager.pop()
             _state.value = CaptureState.Success(monsterId = monster.id)
         }
     }
 
     fun reset() {
         holdJob?.cancel()
+        filterLayerManager.pop()
         _state.value = CaptureState.Idle
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        filterLayerManager.pop()
     }
 }

@@ -48,7 +48,7 @@ import java.util.concurrent.Executors
 
 @Composable
 fun ArScanScreen(
-    onNavigateToCapture: () -> Unit,
+    onNavigateToCapture: (archetypeId: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ArViewModel = hiltViewModel(),
 ) {
@@ -77,10 +77,12 @@ fun ArScanScreen(
         }
     }
 
-    // Navigate to capture when a monster spawns
+    // Navigate to capture when a monster spawns — pass archetype ID so CaptureViewModel
+    // can seed its initial state without relying on SharedFlow replay.
     LaunchedEffect(uiState) {
-        if (uiState is ArUiState.MonsterSpawned) {
-            onNavigateToCapture()
+        val s = uiState
+        if (s is ArUiState.MonsterSpawned) {
+            onNavigateToCapture(s.archetype.id)
         }
     }
 

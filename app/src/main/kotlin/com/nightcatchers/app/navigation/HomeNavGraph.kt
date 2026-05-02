@@ -73,8 +73,8 @@ fun HomeNavGraph(
         navigation<Dest.ScanCamera>(startDestination = Dest.ScanCamera) {
             composable<Dest.ScanCamera> {
                 ArScanScreen(
-                    onNavigateToCapture = {
-                        navController.navigate(Dest.ScanCapture("")) {
+                    onNavigateToCapture = { archetypeId ->
+                        navController.navigate(Dest.ScanCapture(archetypeId)) {
                             launchSingleTop = true
                         }
                     },

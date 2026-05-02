@@ -12,7 +12,7 @@ sealed interface Dest {
     // ── Scan nested graph ──
     @Serializable object ScanCamera : Dest
     @Serializable object ScanFilters : Dest
-    @Serializable data class ScanCapture(val monsterId: String) : Dest
+    @Serializable data class ScanCapture(val archetypeId: String) : Dest
     @Serializable data class ScanResult(val monsterId: String) : Dest
 
     // ── Vault nested graph ──
