@@ -92,6 +92,8 @@ Emergency downgrade: 3 consecutive frames > 20ms triggers tier fallback in `Filt
 | Play | — | +20 | -10 | — | +3 |
 | Train | — | — | -15 | -5 | +8 |
 | Story | — | +10 | -5 | — | +5 |
+| Comfort | — | +15 | -5 | -10 | +6 |
+| Praise | — | +12 | — | — | +4 |
 
 Stats clamp 0–100. Decay runs every 4 hours via `StatDecayWorker`.
 

@@ -31,3 +31,17 @@ proguard/
 *.bak
 *.swp
 *~
+
+# Build logs and temp scripts (never commit these)
+*.log
+*.log.txt
+*_log.txt
+*_build_log.txt
+build_result.log
+filter_build_log.txt
+full_build.log
+last_build_log.txt
+security_build.log
+domain_compile.log
+tmp_*.py
+tmp_*.sh
