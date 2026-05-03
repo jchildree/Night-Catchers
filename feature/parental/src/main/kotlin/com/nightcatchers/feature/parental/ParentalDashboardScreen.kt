@@ -30,6 +30,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nightcatchers.core.domain.model.PendingShare
+import com.nightcatchers.core.domain.model.ShareType
 import com.nightcatchers.core.ui.theme.DeepNight
 import com.nightcatchers.core.ui.theme.PetRoomBgTop
 import com.nightcatchers.core.ui.theme.SoftLavender
@@ -40,7 +44,10 @@ import kotlin.math.roundToInt
 fun ParentalDashboardScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: ParentalDashboardViewModel = hiltViewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -56,7 +63,11 @@ fun ParentalDashboardScreen(
             Spacer(Modifier.height(20.dp))
             ScreenTimeLimitCard()
             Spacer(Modifier.height(16.dp))
-            PendingSharesCard()
+            PendingSharesCard(
+                shares = uiState.pendingShares,
+                onApprove = viewModel::approveShare,
+                onDecline = viewModel::declineShare,
+            )
             Spacer(Modifier.height(16.dp))
             PinManagementCard()
         }
@@ -134,19 +145,76 @@ private fun ScreenTimeLimitCard() {
 }
 
 @Composable
-private fun PendingSharesCard() {
+private fun PendingSharesCard(
+    shares: List<PendingShare>,
+    onApprove: (String) -> Unit,
+    onDecline: (String) -> Unit,
+) {
     DashboardCard(title = "Pending Share Approvals") {
-        Box(
+        if (shares.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "No pending shares",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.4f),
+                )
+            }
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                shares.forEach { share ->
+                    ShareItem(
+                        share = share,
+                        onApprove = { onApprove(share.id) },
+                        onDecline = { onDecline(share.id) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShareItem(
+    share: PendingShare,
+    onApprove: () -> Unit,
+    onDecline: () -> Unit,
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = Color.White.copy(alpha = 0.06f),
+    ) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            contentAlignment = Alignment.Center,
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                text = "No pending shares",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.4f),
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = share.monsterName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White,
+                )
+                Text(
+                    text = share.type.label(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.5f),
+                )
+            }
+            Row {
+                TextButton(onClick = onDecline) {
+                    Text(text = "Decline", color = Color(0xFFFF6F61))
+                }
+                TextButton(onClick = onApprove) {
+                    Text(text = "Approve", color = SoftLavender)
+                }
+            }
         }
     }
 }
@@ -204,4 +272,11 @@ private fun formatMinutes(minutes: Int): String = when {
     minutes < 60 -> "$minutes min"
     minutes % 60 == 0 -> "${minutes / 60}h"
     else -> "${minutes / 60}h ${minutes % 60}min"
+}
+
+private fun ShareType.label(): String = when (this) {
+    ShareType.CAPTURE_CLIP -> "Capture Clip"
+    ShareType.CAPTURE_CARD -> "Capture Card"
+    ShareType.EVOLUTION_CARD -> "Evolution Card"
+    ShareType.FRIENDSHIP_CARD -> "Friendship Card"
 }

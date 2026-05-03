@@ -12,9 +12,12 @@ import com.nightcatchers.core.domain.usecase.GetBondStageUseCase
 import com.nightcatchers.core.domain.usecase.GetMoodStateUseCase
 import com.nightcatchers.core.domain.usecase.GetRoomStageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -37,6 +40,9 @@ class PetViewModel @Inject constructor(
 
     private val _interacting = MutableStateFlow(false)
     private val _interactionResult = MutableStateFlow<InteractionResult?>(null)
+
+    private val _events = MutableSharedFlow<PetEvent>()
+    val events: SharedFlow<PetEvent> = _events.asSharedFlow()
 
     val uiState: StateFlow<PetUiState> = combine(
         monsterRepository.observeById(monsterId),
@@ -74,13 +80,16 @@ class PetViewModel @Inject constructor(
         viewModelScope.launch {
             _interacting.update { true }
             _interactionResult.update { null }
-            runCatching { petRepository.applyInteraction(monsterId, interaction) }
-                .onSuccess { newState ->
-                    _interactionResult.update { interactionResultFor(interaction) }
-                    if (newState.stats.trust >= 80) {
-                        runCatching { evolvePet(monsterId) }
+            val newState = runCatching { petRepository.applyInteraction(monsterId, interaction) }.getOrNull()
+            if (newState != null) {
+                _interactionResult.update { interactionResultFor(interaction) }
+                if (newState.stats.trust >= 80) {
+                    val evolved = runCatching { evolvePet(monsterId) }.getOrNull()
+                    if (evolved != null && evolved.stage != newState.stage) {
+                        _events.emit(PetEvent.NavigateToEvolve(monsterId))
                     }
                 }
+            }
             _interacting.update { false }
         }
     }

@@ -73,10 +73,19 @@ import kotlinx.coroutines.delay
 fun PetRoomScreen(
     monsterId: String,
     onNavigateBack: () -> Unit,
+    onNavigateToEvolve: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: PetViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is PetEvent.NavigateToEvolve -> onNavigateToEvolve(event.monsterId)
+            }
+        }
+    }
 
     Box(
         modifier = modifier.fillMaxSize(),
