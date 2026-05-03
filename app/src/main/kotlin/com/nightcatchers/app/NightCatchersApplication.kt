@@ -6,8 +6,8 @@ import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.google.firebase.appcheck.AppCheckProviderFactory
 import com.google.firebase.appcheck.FirebaseAppCheck
-import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.nightcatchers.feature.pet.worker.AnniversaryCheckWorker
 import com.nightcatchers.feature.pet.worker.ShareReviewWorker
@@ -34,12 +34,22 @@ class NightCatchersApplication : Application(), Configuration.Provider {
     }
 
     private fun initFirebaseAppCheck() {
-        val provider = if (BuildConfig.DEBUG) {
-            DebugAppCheckProviderFactory.getInstance()
+        val provider: AppCheckProviderFactory = if (BuildConfig.DEBUG) {
+            getDebugAppCheckProviderFactory() ?: PlayIntegrityAppCheckProviderFactory.getInstance()
         } else {
             PlayIntegrityAppCheckProviderFactory.getInstance()
         }
         FirebaseAppCheck.getInstance().installAppCheckProviderFactory(provider)
+    }
+
+    private fun getDebugAppCheckProviderFactory(): AppCheckProviderFactory? {
+        return try {
+            val clazz = Class.forName("com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory")
+            val method = clazz.getMethod("getInstance")
+            method.invoke(null) as? AppCheckProviderFactory
+        } catch (ignored: Throwable) {
+            null
+        }
     }
 
     private fun scheduleBackgroundWorkers() {
