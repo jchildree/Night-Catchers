@@ -27,6 +27,7 @@ import com.nightcatchers.feature.ar.ArScanScreen
 import com.nightcatchers.feature.capture.CaptureScreen
 import com.nightcatchers.feature.parental.ParentalDashboardScreen
 import com.nightcatchers.feature.parental.PinGateScreen
+import com.nightcatchers.feature.pet.PetEvolveScreen
 import com.nightcatchers.feature.pet.PetRoomScreen
 import com.nightcatchers.feature.vault.MonsterDetailScreen
 import com.nightcatchers.feature.vault.VaultScreen
@@ -113,14 +114,19 @@ fun HomeNavGraph(
                     PetRoomScreen(
                         monsterId = dest.monsterId,
                         onNavigateBack = { navController.popBackStack() },
+                        onNavigateToEvolve = { id -> navController.navigateToEvolve(id) },
                     )
                 }
             }
             composable<Dest.PetPlay> {
                 // MiniGameScreen — V2
             }
-            composable<Dest.PetEvolve> {
-                // EvolveScreen — V2
+            composable<Dest.PetEvolve> { back ->
+                val dest = back.toRoute<Dest.PetEvolve>()
+                PetEvolveScreen(
+                    monsterId = dest.monsterId,
+                    onDismiss = { navController.popBackStack() },
+                )
             }
         }
 

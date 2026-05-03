@@ -40,9 +40,10 @@ class FakePetRepository : PetRepository {
         val current = states.value[monsterId] ?: defaultState(monsterId)
         val decayed = current.copy(
             stats = current.stats.copy(
-                hunger = (current.stats.hunger - 5).coerceAtLeast(0),
+                hunger = (current.stats.hunger - 4).coerceAtLeast(0),
                 happiness = (current.stats.happiness - 3).coerceAtLeast(0),
                 energy = (current.stats.energy - 2).coerceAtLeast(0),
+                spookiness = (current.stats.spookiness + 1).coerceAtMost(100),
             ),
             updatedAt = Instant.now(),
         )
