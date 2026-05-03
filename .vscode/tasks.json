@@ -2,32 +2,46 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "docker-build",
-			"label": "docker-build",
-			"platform": "python",
-			"dockerBuild": {
-				"tag": "nightcatchers:latest",
-				"dockerfile": "${workspaceFolder}/Dockerfile",
-				"context": "${workspaceFolder}",
-				"pull": true
-			}
+			"type": "shell",
+			"label": "build",
+			"command": "./gradlew",
+			"args": ["build"],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": "$gradle"
 		},
 		{
-			"type": "docker-run",
-			"label": "docker-run: debug",
-			"dependsOn": [
-				"docker-build"
-			],
-			"python": {
-				"args": [
-					"tmp_read_log:app",
-					"--host",
-					"0.0.0.0",
-					"--port",
-					"undefined"
-				],
-				"module": "uvicorn"
-			}
+			"type": "shell",
+			"label": "test",
+			"command": "./gradlew",
+			"args": ["test"],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": "$gradle"
+		},
+		{
+			"type": "shell",
+			"label": "detekt",
+			"command": "./gradlew",
+			"args": ["detekt"],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": "$gradle"
 		}
 	]
 }
