@@ -1,2 +1,0 @@
-# REMOVED: compose.debug.yaml removed in branch 'remove-docker'.
-# To delete locally: git rm compose.debug.yaml && git commit -m "chore: remove Docker files" && git push -u origin remove-docker

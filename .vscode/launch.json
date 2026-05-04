@@ -1,2 +1,0 @@
-# REMOVED: .vscode/launch.json removed in branch 'remove-docker'.
-# To delete locally: git rm .vscode/launch.json && git commit -m "chore: remove Docker files" && git push -u origin remove-docker
