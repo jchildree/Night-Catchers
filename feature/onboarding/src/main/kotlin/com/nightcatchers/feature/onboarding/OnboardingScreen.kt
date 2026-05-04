@@ -168,8 +168,8 @@ private fun NotificationPermissionsPage(
         cta = if (permissionGranted) "Permission Granted ✓" else "Allow Notifications",
         ctaEnabled = !permissionGranted,
         onCta = { launcher.launch(Manifest.permission.POST_NOTIFICATIONS) },
-        secondaryCta = if (permissionGranted) "Next" else null,
-        onSecondaryCta = if (permissionGranted) onNext else null,
+        secondaryCta = if (permissionGranted) "Next" else "Skip for now",
+        onSecondaryCta = onNext,
     )
 }
 

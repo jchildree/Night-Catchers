@@ -1,19 +1,2 @@
-{
-    "configurations": [
-        {
-            "name": "Containers: Python - Fastapi",
-            "type": "docker",
-            "request": "launch",
-            "preLaunchTask": "docker-run: debug",
-            "python": {
-                "pathMappings": [
-                    {
-                        "localRoot": "${workspaceFolder}",
-                        "remoteRoot": "/app"
-                    }
-                ],
-                "projectType": "fastapi"
-            }
-        }
-    ]
-}
+# REMOVED: .vscode/launch.json removed in branch 'remove-docker'.
+# To delete locally: git rm .vscode/launch.json && git commit -m "chore: remove Docker files" && git push -u origin remove-docker

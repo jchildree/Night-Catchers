@@ -26,7 +26,7 @@ Every screen must honour these six principles:
 #### Capture Mode — Ghostbusters
 
 | Token | Hex | Usage |
-|-------|-----|-------|
+| ------- | ----- | ------- |
 | **Slime Green** | `#7FFF00` | Primary CTA, proton beam, active states |
 | **Ecto Cyan** | `#00F5FF` | AR anchors, HUD, radar blips |
 | **Alert Red** | `#FF6B6B` | Danger states, low stats, escape |

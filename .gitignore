@@ -46,3 +46,4 @@ security_build.log
 domain_compile.log
 tmp_*.py
 tmp_*.sh
+FAILURE
