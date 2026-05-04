@@ -1,4 +1,6 @@
-### Building and running your application
+# REMOVED: Docker-specific README. This project is an Android Kotlin app and does not use Docker/Python artifacts.
+
+# Original content removed.
 
 When you're ready, start your application by running:
 `docker compose up --build`.

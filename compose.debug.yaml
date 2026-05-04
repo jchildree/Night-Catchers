@@ -1,9 +1,2 @@
-services:
-  nightcatchers:
-    image: nightcatchers
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 -m uvicorn tmp_read_log:app --host 0.0.0.0 --port undefined"]
-    ports:
-      - 5678:5678
+# REMOVED: compose.debug.yaml not used. This file configured a Python debug container (debugpy/uvicorn) and is not relevant to the Android project.
+# To delete: git rm compose.debug.yaml && git commit -m "chore: remove debug compose file"
