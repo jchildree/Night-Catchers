@@ -1,4 +1,5 @@
-# REMOVED: Docker-specific README. This project is an Android Kotlin app and does not use Docker/Python artifacts.
+# REMOVED: README.Docker.md removed in branch 'remove-docker'.
+# To delete locally: git rm README.Docker.md && git commit -m "chore: remove Docker files" && git push -u origin remove-docker
 
 # Original content removed.
 

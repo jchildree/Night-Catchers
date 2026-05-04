@@ -1,2 +1,2 @@
-# REMOVED: compose.debug.yaml not used. This file configured a Python debug container (debugpy/uvicorn) and is not relevant to the Android project.
-# To delete: git rm compose.debug.yaml && git commit -m "chore: remove debug compose file"
+# REMOVED: compose.debug.yaml removed in branch 'remove-docker'.
+# To delete locally: git rm compose.debug.yaml && git commit -m "chore: remove Docker files" && git push -u origin remove-docker

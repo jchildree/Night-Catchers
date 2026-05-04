@@ -1,4 +1,5 @@
-# Docker ignore for Android Gradle builds
+# REMOVED: .dockerignore removed in branch 'remove-docker'.
+# To delete locally: git rm .dockerignore && git commit -m "chore: remove Docker files" && git push -u origin remove-docker
 .gradle
 **/build
 **/.gradle
