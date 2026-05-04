@@ -1,1 +1,0 @@
-# REMOVED: requirements.txt not used in this Android project.

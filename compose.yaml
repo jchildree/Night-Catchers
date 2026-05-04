@@ -1,3 +1,0 @@
-# REMOVED: compose.yaml not used in this Android Kotlin project.
-# Docker / Compose artifacts were added accidentally and are not needed for this repository.
-# To delete this file from the repo locally: git rm compose.yaml && git commit -m "chore: remove compose.yaml"
