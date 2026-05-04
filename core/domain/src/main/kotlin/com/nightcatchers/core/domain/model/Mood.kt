@@ -8,4 +8,7 @@ enum class Mood {
     SLEEPY,
     PLAYFUL,
     SPOOKED,
+    MISSING_YOU,
+    BONDED,
+    ECSTATIC,
 }

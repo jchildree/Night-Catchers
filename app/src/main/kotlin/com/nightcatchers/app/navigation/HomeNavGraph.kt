@@ -26,6 +26,7 @@ import com.nightcatchers.core.ui.theme.PetRoomBgTop
 import com.nightcatchers.feature.ar.ArScanScreen
 import com.nightcatchers.feature.capture.CaptureScreen
 import com.nightcatchers.feature.parental.ParentalDashboardScreen
+import com.nightcatchers.feature.parental.PinChangeScreen
 import com.nightcatchers.feature.parental.PinGateScreen
 import com.nightcatchers.feature.pet.PetEvolveScreen
 import com.nightcatchers.feature.pet.PetRoomScreen
@@ -165,7 +166,15 @@ fun HomeNavGraph(
             composable<Dest.SettingsParentTime> {
                 ParentalDashboardScreen(
                     onNavigateBack = { navController.popBackStack() },
+                    onNavigateToPinChange = {
+                        navController.navigate(Dest.SettingsParentPinChange) {
+                            launchSingleTop = true
+                        }
+                    },
                 )
+            }
+            composable<Dest.SettingsParentPinChange> {
+                PinChangeScreen(onDone = { navController.popBackStack() })
             }
         }
     }

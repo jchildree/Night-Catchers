@@ -35,4 +35,5 @@ sealed interface Dest {
     @Serializable object Settings : Dest
     @Serializable object SettingsParent : Dest
     @Serializable object SettingsParentTime : Dest
+    @Serializable object SettingsParentPinChange : Dest
 }

@@ -43,6 +43,7 @@ import kotlin.math.roundToInt
 @Composable
 fun ParentalDashboardScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToPinChange: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ParentalDashboardViewModel = hiltViewModel(),
 ) {
@@ -69,7 +70,7 @@ fun ParentalDashboardScreen(
                 onDecline = viewModel::declineShare,
             )
             Spacer(Modifier.height(16.dp))
-            PinManagementCard()
+            PinManagementCard(onNavigateToPinChange = onNavigateToPinChange)
         }
     }
 }
@@ -220,7 +221,7 @@ private fun ShareItem(
 }
 
 @Composable
-private fun PinManagementCard() {
+private fun PinManagementCard(onNavigateToPinChange: () -> Unit) {
     DashboardCard(title = "Security") {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -239,7 +240,7 @@ private fun PinManagementCard() {
                     color = Color.White.copy(alpha = 0.5f),
                 )
             }
-            TextButton(onClick = { /* TODO: navigate to PIN change flow */ }) {
+            TextButton(onClick = onNavigateToPinChange) {
                 Text(text = "Change", color = SoftLavender)
             }
         }

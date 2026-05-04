@@ -60,7 +60,7 @@ class PetViewModel @Inject constructor(
             monster = monster,
             archetype = archetype,
             stats = petState.stats,
-            mood = petState.mood,
+            mood = getMoodState(petState.stats, petState.lastInteractedAt),
             evolutionStage = petState.stage,
             bondStage = getBondStage(petState.stats.trust),
             roomStage = getRoomStage(petState.stats.trust),

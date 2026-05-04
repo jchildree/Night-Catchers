@@ -1,4 +1,12 @@
-# Monster Catcher — Design Guide
+# DESIGN_GUIDE.md
+
+This file provides design guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+> **Spec vs. implementation:** This document describes the intended design. Where implementation diverges, it is noted inline. For current implementation details see `CLAUDE.md`.
+
+---
+
+## Night Catchers — Design Guide
 
 **Version:** 1.1  
 **For:** Android · Kotlin 2.0 · Jetpack Compose  
@@ -127,7 +135,7 @@ Display Surface
 | **Shared Vertex Shader** | One vertex shader bound once per GL session. All fragment shaders consume `vTexCoord`. Never re-bind between passes. |
 | **Tier Detection** | `TierDetector` identifies device tier at startup. Tier A (6 FBO max), B (2 FBO max), C (0 GL, Lottie fallback). |
 
-### Filter Catalog — 9 Filters
+### Filter Catalog — 8 Filters
 
 | Icon | Name | Cost | Tiers | Type |
 |------|------|------|-------|------|
@@ -195,10 +203,10 @@ In the film *"If"*, imaginary friends are forgotten because people stop believin
 
 | Stat | Range | Decay | Critical Threshold | Raised By |
 |------|-------|-------|--------------------|-----------| 
-| **Hunger** | 0–100 | -5 every 4h | < 20 → GRUMBLY | Feed |
-| **Happiness** | 0–100 | -4 every 6h | < 25 → LONELY | Play, Cuddle, Mini-games |
-| **Energy** | 0–100 | Reset to 100 at midnight | < 20 → SLEEPY | Sleep (automatic) |
-| **Spookiness** | 0–100 | No decay | > 85 → SPOOKED | Personality stat |
+| **Hunger** | 0–100 | −5 every 4h *(impl: −4)* | < 20 → GRUMBLY | Feed |
+| **Happiness** | 0–100 | −4 every 6h *(impl: −3)* | < 25 → LONELY | Play, Cuddle, Mini-games |
+| **Energy** | 0–100 | Reset to 100 at midnight *(impl: −2 per cycle)* | < 20 → SLEEPY | Sleep (automatic) |
+| **Spookiness** | 0–100 | No decay *(impl: +1 per cycle)* | > 85 → SPOOKED | Personality stat |
 | **Trust** | 0–100 | No decay | Gates Bond computation | All positive interactions |
 
 **Immortality Rule:** No stat reaching 0 causes irreversible consequence. Zero stat = worst mood for that stat, nothing more. WorkManager uses `ExistingPeriodicWorkPolicy.KEEP` so decay schedules survive app restarts.
@@ -207,14 +215,16 @@ In the film *"If"*, imaginary friends are forgotten because people stop believin
 
 Evaluated top-to-bottom; first match wins:
 
-1. **MISSING_YOU** (7+ days inactive) — HIGHEST priority
-2. **GRUMBLY** (hunger < 20)
+1. **MISSING_YOU** (7+ days inactive) — HIGHEST priority *(not yet implemented)*
+2. **GRUMBLY** (hunger < 20) *(implemented as `GRUMPY`)*
 3. **LONELY** (happiness < 25)
 4. **SLEEPY** (energy < 20)
 5. **SPOOKED** (spookiness > 85)
-6. **BONDED** (bond level ≥ 8)
-7. **ECSTATIC** (all stats > 80)
+6. **BONDED** (bond level ≥ 8) *(not yet implemented)*
+7. **ECSTATIC** (all stats > 80) *(implemented as `EXCITED`: happiness > 80 && energy > 70)*
 8. **CONTENT** (default healthy state)
+
+> **Current implementation** in `GetMoodStateUseCase` has 7 moods (SLEEPY, GRUMPY, LONELY, SPOOKED, EXCITED, PLAYFUL, CONTENT). MISSING_YOU and BONDED are specified here but not yet wired up.
 
 Each mood has a Lottie animation file (`idle_happy_loop.json`, etc.). Mood swaps crossfade over 400ms via `animateFloatAsState`.
 
@@ -509,7 +519,7 @@ Before each major release, run structured sessions with real children (with pare
 3. **`:feature:ar`** → CameraX session setup
 4. **`:feature:filters`** → FilterLayerManager + first 2 shaders (Proton Beam, Night Vision)
 5. **`:feature:pet`** → PetEntity + WorkManager decay
-6. **`:feature:pet-room`** → PetRoomScreen Compose UI
+6. **`:feature:pet`** → PetRoomScreen Compose UI
 7. **`:feature:onboarding`** → Parent consent gate + age bucket selection
 8. **`:feature:parental`** → Parent Dashboard (analytics view, controls)
 
