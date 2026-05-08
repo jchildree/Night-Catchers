@@ -18,6 +18,11 @@ google-services-dev.json
 *.kotlin_module
 /.kotlin/
 
+# Node / Web
+node_modules/
+dist/
+.vite/
+
 # Gradle
 .gradle/
 build/
