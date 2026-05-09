@@ -82,6 +82,7 @@ fun PetRoomScreen(
     monsterId: String,
     onNavigateBack: () -> Unit,
     onNavigateToEvolve: (String) -> Unit = {},
+    onNavigateToPlayMenu: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: PetViewModel = hiltViewModel(),
 ) {
@@ -91,6 +92,7 @@ fun PetRoomScreen(
         viewModel.events.collect { event ->
             when (event) {
                 is PetEvent.NavigateToEvolve -> onNavigateToEvolve(event.monsterId)
+                is PetEvent.NavigateToPlayMenu -> onNavigateToPlayMenu(event.monsterId)
             }
         }
     }
@@ -111,6 +113,7 @@ fun PetRoomScreen(
                 state = s,
                 onInteract = viewModel::onInteract,
                 onDismissResult = viewModel::dismissInteractionResult,
+                onNavigateToPlayMenu = { viewModel.onNavigateToPlayMenu() },
             )
         }
     }
@@ -121,6 +124,7 @@ private fun PetRoomContent(
     state: PetUiState.Ready,
     onInteract: (PetInteraction) -> Unit,
     onDismissResult: () -> Unit,
+    onNavigateToPlayMenu: () -> Unit = {},
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         RoomBackground(roomStage = state.roomStage)
@@ -141,6 +145,7 @@ private fun PetRoomContent(
             InteractionGrid(
                 state = state,
                 onInteract = onInteract,
+                onNavigateToPlayMenu = onNavigateToPlayMenu,
             )
         }
 
@@ -307,14 +312,16 @@ private fun StatsPanel(state: PetUiState.Ready) {
 private fun InteractionGrid(
     state: PetUiState.Ready,
     onInteract: (PetInteraction) -> Unit,
+    onNavigateToPlayMenu: () -> Unit = {},
 ) {
+    // interactions list: null interaction means navigate to PlayMenu instead of applying stat
     val interactions = listOf(
-        Triple(PetInteraction.Feed,    "Feed",    "🍖"),
-        Triple(PetInteraction.Play,    "Play",    "🎮"),
-        Triple(PetInteraction.Train,   "Train",   "🏋️"),
-        Triple(PetInteraction.Story,   "Story",   "📖"),
-        Triple(PetInteraction.Comfort, "Comfort", "🤗"),
-        Triple(PetInteraction.Praise,  "Praise",  "⭐"),
+        Triple<PetInteraction?, String, String>(PetInteraction.Feed,    "Feed",    "🍖"),
+        Triple<PetInteraction?, String, String>(null,                   "Play",    "🎮"),
+        Triple<PetInteraction?, String, String>(PetInteraction.Train,   "Train",   "🏋️"),
+        Triple<PetInteraction?, String, String>(PetInteraction.Story,   "Story",   "📖"),
+        Triple<PetInteraction?, String, String>(PetInteraction.Comfort, "Comfort", "🤗"),
+        Triple<PetInteraction?, String, String>(PetInteraction.Praise,  "Praise",  "⭐"),
     )
 
     Column {
@@ -334,7 +341,10 @@ private fun InteractionGrid(
                         label = label,
                         emoji = emoji,
                         enabled = !state.isInteracting,
-                        onClick = { onInteract(interaction) },
+                        onClick = {
+                            if (interaction != null) onInteract(interaction)
+                            else onNavigateToPlayMenu()
+                        },
                         modifier = Modifier.weight(1f),
                     )
                 }
