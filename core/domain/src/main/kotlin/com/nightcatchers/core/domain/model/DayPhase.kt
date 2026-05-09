@@ -11,6 +11,7 @@ enum class DayPhase(val hourStart: Int, val hourEnd: Int) {
     ;
 
     companion object {
+        @JvmStatic
         fun fromHour(hour: Int): DayPhase = entries.firstOrNull { phase ->
             if (phase == NIGHT) hour >= 21 || hour <= 5
             else hour in phase.hourStart..phase.hourEnd

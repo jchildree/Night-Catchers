@@ -98,6 +98,12 @@ class PetViewModel @Inject constructor(
         _interactionResult.update { null }
     }
 
+    fun onNavigateToPlayMenu() {
+        viewModelScope.launch {
+            _events.emit(PetEvent.NavigateToPlayMenu(monsterId))
+        }
+    }
+
     private fun interactionResultFor(interaction: PetInteraction): InteractionResult = when (interaction) {
         PetInteraction.Feed -> InteractionResult("Fed!", "🍖")
         PetInteraction.Play -> InteractionResult("Played!", "🎮")

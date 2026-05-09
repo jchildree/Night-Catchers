@@ -33,6 +33,7 @@ class ShareReviewWorker @AssistedInject constructor(
     companion object {
         const val WORK_NAME = "share_review_worker"
 
+        @JvmStatic
         fun buildRequest() = PeriodicWorkRequestBuilder<ShareReviewWorker>(6, TimeUnit.HOURS)
             .build()
     }
