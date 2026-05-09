@@ -44,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nightcatchers.core.domain.model.Mood
 import com.nightcatchers.core.domain.model.Rarity
 import com.nightcatchers.core.ui.component.MonsterAvatar
+import com.nightcatchers.core.ui.theme.DangerRed
 import com.nightcatchers.core.ui.theme.DeepNight
 import com.nightcatchers.core.ui.theme.RarityCommon
 import com.nightcatchers.core.ui.theme.RarityLegendary
@@ -64,7 +65,7 @@ fun VaultScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(Color(0xFF0D0D1A), DeepNight))),
+            .background(Brush.verticalGradient(listOf(SurfaceDark, DeepNight))),
     ) {
         when (val s = state) {
             is VaultUiState.Loading -> CircularProgressIndicator(
@@ -270,7 +271,7 @@ private fun ReleaseConfirmDialog(
         confirmButton = {
             Button(
                 onClick = onConfirm,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF4D4D)),
+                colors = ButtonDefaults.buttonColors(containerColor = DangerRed),
             ) {
                 Text("Release", color = Color.White)
             }

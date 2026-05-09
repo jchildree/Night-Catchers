@@ -17,6 +17,7 @@ enum class RoomStage(
     ;
 
     companion object {
+        @JvmStatic
         fun fromTrust(trust: Int): RoomStage =
             entries.lastOrNull { trust >= it.trustMin } ?: HOLDING_PEN
     }

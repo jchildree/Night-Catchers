@@ -17,6 +17,7 @@ enum class BondStage(
     ;
 
     companion object {
+        @JvmStatic
         fun fromTrust(trust: Int): BondStage =
             entries.lastOrNull { trust >= it.trustMin } ?: STRANGER
     }

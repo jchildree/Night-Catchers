@@ -18,6 +18,7 @@ data class SafetyPolicy(
     }
 
     companion object {
+        @JvmStatic
         fun isBedtime(tier: AccountTier, hour: Int): Boolean {
             if (tier == AccountTier.ADULT) return false
             return hour >= tier.bedtimeStart || hour < tier.bedtimeEnd

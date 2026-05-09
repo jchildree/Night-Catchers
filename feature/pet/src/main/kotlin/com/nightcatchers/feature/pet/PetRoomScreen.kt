@@ -53,8 +53,14 @@ import com.nightcatchers.core.domain.model.RoomStage
 import com.nightcatchers.core.ui.component.MonsterAvatar
 import com.nightcatchers.core.ui.component.StatBar
 import com.nightcatchers.core.ui.theme.ButteryYellow
+import com.nightcatchers.core.ui.theme.CoralAccent
+import com.nightcatchers.core.ui.theme.CosyCornerBg
 import com.nightcatchers.core.ui.theme.DeepNight
 import com.nightcatchers.core.ui.theme.DeepVoid
+import com.nightcatchers.core.ui.theme.DreamRoomBgBottom
+import com.nightcatchers.core.ui.theme.DreamRoomBgTop
+import com.nightcatchers.core.ui.theme.FireflyGreen
+import com.nightcatchers.core.ui.theme.MidnightPurple
 import com.nightcatchers.core.ui.theme.MintFresh
 import com.nightcatchers.core.ui.theme.MonsterPurple
 import com.nightcatchers.core.ui.theme.PeachWarm
@@ -62,6 +68,8 @@ import com.nightcatchers.core.ui.theme.PetRoomBgBottom
 import com.nightcatchers.core.ui.theme.PetRoomBgTop
 import com.nightcatchers.core.ui.theme.SkyBlue
 import com.nightcatchers.core.ui.theme.SoftLavender
+import com.nightcatchers.core.ui.theme.SurfaceDark
+import com.nightcatchers.core.ui.theme.SurfaceVariant
 import com.nightcatchers.core.ui.theme.StatEnergy
 import com.nightcatchers.core.ui.theme.StatHappiness
 import com.nightcatchers.core.ui.theme.StatHunger
@@ -182,7 +190,7 @@ private fun FireflyOverlay() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF00FF88).copy(alpha = alpha * 0.04f)),
+            .background(FireflyGreen.copy(alpha = alpha * 0.04f)),
     )
 }
 
@@ -390,11 +398,11 @@ private fun InteractionBurst(result: InteractionResult) {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 private fun RoomStage.backgroundColors(): Pair<Color, Color> = when (this) {
-    RoomStage.HOLDING_PEN -> Pair(Color(0xFF1A1A2E), Color(0xFF0D0D1A))
-    RoomStage.COSY_CORNER -> Pair(Color(0xFF2D1B4E), Color(0xFF1A0F2E))
-    RoomStage.BEDROOM     -> Pair(Color(0xFF1E1040), PetRoomBgBottom)
-    RoomStage.SANCTUARY   -> Pair(PetRoomBgTop, Color(0xFF0A1628))
-    RoomStage.DREAM_ROOM  -> Pair(Color(0xFF0D0A2E), Color(0xFF050318))
+    RoomStage.HOLDING_PEN -> Pair(SurfaceVariant, SurfaceDark)
+    RoomStage.COSY_CORNER -> Pair(CosyCornerBg, PetRoomBgTop)
+    RoomStage.BEDROOM     -> Pair(MidnightPurple, PetRoomBgBottom)
+    RoomStage.SANCTUARY   -> Pair(PetRoomBgTop, PetRoomBgBottom)
+    RoomStage.DREAM_ROOM  -> Pair(DreamRoomBgTop, DreamRoomBgBottom)
 }
 
 private fun RoomStage.nextLabel(): String = when (this) {
@@ -429,7 +437,7 @@ private fun Mood.chipColor(): Color = when (this) {
     Mood.CONTENT  -> MintFresh
     Mood.EXCITED  -> ButteryYellow
     Mood.LONELY   -> SkyBlue
-    Mood.GRUMPY   -> Color(0xFFFF6F61)
+    Mood.GRUMPY   -> CoralAccent
     Mood.SLEEPY   -> SoftLavender
     Mood.PLAYFUL  -> PeachWarm
     Mood.SPOOKED  -> MonsterPurple

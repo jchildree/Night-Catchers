@@ -34,6 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nightcatchers.core.domain.model.PendingShare
 import com.nightcatchers.core.domain.model.ShareType
+import com.nightcatchers.core.ui.theme.CoralAccent
 import com.nightcatchers.core.ui.theme.DeepNight
 import com.nightcatchers.core.ui.theme.PetRoomBgTop
 import com.nightcatchers.core.ui.theme.SoftLavender
@@ -210,7 +211,7 @@ private fun ShareItem(
             }
             Row {
                 TextButton(onClick = onDecline) {
-                    Text(text = "Decline", color = Color(0xFFFF6F61))
+                    Text(text = "Decline", color = CoralAccent)
                 }
                 TextButton(onClick = onApprove) {
                     Text(text = "Approve", color = SoftLavender)

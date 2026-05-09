@@ -44,6 +44,7 @@ class StatDecayWorker @AssistedInject constructor(
     companion object {
         const val WORK_NAME = "stat_decay_worker"
 
+        @JvmStatic
         fun buildRequest() = PeriodicWorkRequestBuilder<StatDecayWorker>(4, TimeUnit.HOURS)
             .build()
     }
