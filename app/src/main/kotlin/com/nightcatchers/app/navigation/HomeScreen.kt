@@ -14,8 +14,8 @@ import androidx.navigation.compose.rememberNavController
 
 private val bottomNavItems = listOf(
     BottomNavItem("Scan",     "👁",  Dest.ScanCamera),
-    BottomNavItem("Vault",    "🏛",  Dest.Vault),
-    BottomNavItem("Pet",      "👾",  Dest.PetRoom("")),
+    BottomNavItem("Monsters", "👾",  Dest.Vault),
+    BottomNavItem("Games",    "🎮",  Dest.Games),
     BottomNavItem("Dex",      "📖",  Dest.Dex),
     BottomNavItem("Settings", "⚙",  Dest.Settings),
 )

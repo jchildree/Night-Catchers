@@ -32,6 +32,7 @@ import com.nightcatchers.core.domain.model.MiniGameId
 import com.nightcatchers.feature.pet.PetEvolveScreen
 import com.nightcatchers.feature.pet.PetRoomScreen
 import com.nightcatchers.feature.pet.play.CuddleStormScreen
+import com.nightcatchers.feature.pet.play.GamesPickerScreen
 import com.nightcatchers.feature.pet.play.MiniGamePlaceholderScreen
 import com.nightcatchers.feature.pet.play.MiniGameResultScreen
 import com.nightcatchers.feature.pet.play.PlayMenuScreen
@@ -55,7 +56,7 @@ fun HomeNavGraph(
         modifier = modifier,
     ) {
 
-        // ── Vault tab ──────────────────────────────────────────────────────
+        // ── Monsters tab (Vault + Pet, merged) ─────────────────────────────
         navigation<Dest.Vault>(startDestination = Dest.Vault) {
             composable<Dest.Vault> {
                 VaultScreen(
@@ -104,99 +105,107 @@ fun HomeNavGraph(
             }
         }
 
-        // ── Pet tab ────────────────────────────────────────────────────────
-        navigation<Dest.PetRoom>(startDestination = Dest.PetRoom("")) {
-            composable<Dest.PetRoom> { back ->
-                val dest = back.toRoute<Dest.PetRoom>()
-                if (dest.monsterId.isBlank()) {
-                    // No monster selected — show vault so user can pick one
-                    VaultScreen(
-                        onNavigateToPet = { monsterId -> navController.navigateToPet(monsterId) },
-                        onNavigateToDetail = { monsterId ->
-                            navController.navigate(Dest.VaultDetail(monsterId))
-                        },
-                    )
-                } else {
-                    PetRoomScreen(
-                        monsterId = dest.monsterId,
-                        onNavigateBack = { navController.popBackStack() },
-                        onNavigateToEvolve = { id -> navController.navigateToEvolve(id) },
-                        onNavigateToPlay = { id -> navController.navigateToPlayMenu(id) },
-                    )
-                }
-            }
-            composable<Dest.PetPlayMenu> { back ->
-                val dest = back.toRoute<Dest.PetPlayMenu>()
-                PlayMenuScreen(
-                    onPlayGame = { gameId ->
-                        navController.navigate(
-                            Dest.PetPlay(monsterId = dest.monsterId, game = gameId.slug),
-                        )
-                    },
-                    onNavigateBack = { navController.popBackStack() },
-                )
-            }
-            composable<Dest.PetPlay> { back ->
-                val dest = back.toRoute<Dest.PetPlay>()
-                val gameId = MiniGameId.fromSlug(dest.game)
-                if (gameId == null) {
-                    PlaceholderScreen(emoji = "❓", label = "Unknown game", subtitle = dest.game)
-                    return@composable
-                }
-                val onComplete: (com.nightcatchers.core.domain.model.MiniGameOutcome) -> Unit =
-                    { outcome ->
-                        navController.navigate(
-                            Dest.PetPlayResult(
-                                monsterId = dest.monsterId,
-                                game = gameId.slug,
-                                rawScore = outcome.rawScore,
-                                scoreBps = (outcome.scoreFraction * 10_000).toInt(),
-                            ),
-                        ) {
-                            popUpTo(Dest.PetPlayMenu(dest.monsterId)) { inclusive = false }
-                        }
-                    }
-                when (gameId) {
-                    MiniGameId.CUDDLE_STORM -> CuddleStormScreen(onSessionComplete = onComplete)
-                    else -> MiniGamePlaceholderScreen(
-                        gameId = gameId,
-                        onSessionComplete = onComplete,
-                        onCancel = { navController.popBackStack() },
-                    )
-                }
-            }
-            composable<Dest.PetPlayResult> { back ->
-                val dest = back.toRoute<Dest.PetPlayResult>()
-                val gameId = MiniGameId.fromSlug(dest.game)
-                    ?: MiniGameId.CUDDLE_STORM
-                val fraction = (dest.scoreBps / 10_000f).coerceIn(0f, 1f)
-                val outcome = com.nightcatchers.core.domain.model.MiniGameOutcome(
-                    gameId = gameId,
-                    scoreFraction = fraction,
-                    rawScore = dest.rawScore,
-                )
-                MiniGameResultScreen(
-                    gameId = gameId,
-                    rawScore = dest.rawScore,
-                    scoreFraction = fraction,
-                    statDelta = outcome.statDelta(),
-                    onPlayAgain = {
-                        navController.navigate(Dest.PetPlay(dest.monsterId, gameId.slug)) {
-                            popUpTo(Dest.PetPlayMenu(dest.monsterId)) { inclusive = false }
-                        }
-                    },
-                    onBackToMenu = {
-                        navController.popBackStack(Dest.PetPlayMenu(dest.monsterId), inclusive = false)
+        // ── Games tab (top-level monster picker → PlayMenu → game) ─────────
+        navigation<Dest.Games>(startDestination = Dest.Games) {
+            composable<Dest.Games> {
+                GamesPickerScreen(
+                    onPickMonster = { monsterId ->
+                        navController.navigateToPlayMenu(monsterId)
                     },
                 )
             }
-            composable<Dest.PetEvolve> { back ->
-                val dest = back.toRoute<Dest.PetEvolve>()
-                PetEvolveScreen(
+        }
+
+        // ── Per-monster Pet flow (room, evolve, play menu, mini-games, result) ─
+        // Declared at top level so both the Monsters and Games tabs can navigate
+        // into it. The Monsters tab reaches it via VaultDetail → Pet; the Games
+        // tab reaches it via GamesPickerScreen → PlayMenu directly.
+        composable<Dest.PetRoom> { back ->
+            val dest = back.toRoute<Dest.PetRoom>()
+            if (dest.monsterId.isBlank()) {
+                VaultScreen(
+                    onNavigateToPet = { id -> navController.navigateToPet(id) },
+                    onNavigateToDetail = { id -> navController.navigate(Dest.VaultDetail(id)) },
+                )
+            } else {
+                PetRoomScreen(
                     monsterId = dest.monsterId,
-                    onDismiss = { navController.popBackStack() },
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToEvolve = { id -> navController.navigateToEvolve(id) },
+                    onNavigateToPlay = { id -> navController.navigateToPlayMenu(id) },
                 )
             }
+        }
+        composable<Dest.PetPlayMenu> { back ->
+            val dest = back.toRoute<Dest.PetPlayMenu>()
+            PlayMenuScreen(
+                onPlayGame = { gameId ->
+                    navController.navigate(
+                        Dest.PetPlay(monsterId = dest.monsterId, game = gameId.slug),
+                    )
+                },
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable<Dest.PetPlay> { back ->
+            val dest = back.toRoute<Dest.PetPlay>()
+            val gameId = MiniGameId.fromSlug(dest.game)
+            if (gameId == null) {
+                PlaceholderScreen(emoji = "❓", label = "Unknown game", subtitle = dest.game)
+                return@composable
+            }
+            val onComplete: (com.nightcatchers.core.domain.model.MiniGameOutcome) -> Unit =
+                { outcome ->
+                    navController.navigate(
+                        Dest.PetPlayResult(
+                            monsterId = dest.monsterId,
+                            game = gameId.slug,
+                            rawScore = outcome.rawScore,
+                            scoreBps = (outcome.scoreFraction * 10_000).toInt(),
+                        ),
+                    ) {
+                        popUpTo(Dest.PetPlayMenu(dest.monsterId)) { inclusive = false }
+                    }
+                }
+            when (gameId) {
+                MiniGameId.CUDDLE_STORM -> CuddleStormScreen(onSessionComplete = onComplete)
+                else -> MiniGamePlaceholderScreen(
+                    gameId = gameId,
+                    onSessionComplete = onComplete,
+                    onCancel = { navController.popBackStack() },
+                )
+            }
+        }
+        composable<Dest.PetPlayResult> { back ->
+            val dest = back.toRoute<Dest.PetPlayResult>()
+            val gameId = MiniGameId.fromSlug(dest.game) ?: MiniGameId.CUDDLE_STORM
+            val fraction = (dest.scoreBps / 10_000f).coerceIn(0f, 1f)
+            val outcome = com.nightcatchers.core.domain.model.MiniGameOutcome(
+                gameId = gameId,
+                scoreFraction = fraction,
+                rawScore = dest.rawScore,
+            )
+            MiniGameResultScreen(
+                gameId = gameId,
+                rawScore = dest.rawScore,
+                scoreFraction = fraction,
+                statDelta = outcome.statDelta(),
+                onPlayAgain = {
+                    navController.navigate(Dest.PetPlay(dest.monsterId, gameId.slug)) {
+                        popUpTo(Dest.PetPlayMenu(dest.monsterId)) { inclusive = false }
+                    }
+                },
+                onBackToMenu = {
+                    navController.popBackStack(Dest.PetPlayMenu(dest.monsterId), inclusive = false)
+                },
+            )
+        }
+        composable<Dest.PetEvolve> { back ->
+            val dest = back.toRoute<Dest.PetEvolve>()
+            PetEvolveScreen(
+                monsterId = dest.monsterId,
+                onDismiss = { navController.popBackStack() },
+            )
         }
 
         // ── Dex tab ────────────────────────────────────────────────────────

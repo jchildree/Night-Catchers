@@ -20,6 +20,9 @@ sealed interface Dest {
     @Serializable data class VaultDetail(val monsterId: String) : Dest
     @Serializable data class VaultRelease(val monsterId: String) : Dest
 
+    // ── Games tab (top-level monster picker → PlayMenu) ──
+    @Serializable object Games : Dest
+
     // ── Pet nested graph ──
     @Serializable data class PetRoom(val monsterId: String) : Dest
     @Serializable data class PetPlayMenu(val monsterId: String) : Dest
