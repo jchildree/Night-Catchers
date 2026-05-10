@@ -59,7 +59,7 @@ class PetRepositoryImpl @Inject constructor(
             val now = Instant.now()
             val newState = current.copy(
                 stats = updated,
-                mood = getMoodState(updated, now),
+                mood = getMoodState(updated),
                 lastInteractedAt = now,
                 updatedAt = now,
             )

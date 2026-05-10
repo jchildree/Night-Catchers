@@ -43,7 +43,9 @@ class CuddleStormViewModel @Inject constructor(
     private val _state = MutableStateFlow(CuddleStormState())
     val state: StateFlow<CuddleStormState> = _state.asStateFlow()
 
-    private val _events = MutableSharedFlow<CuddleStormEvent>()
+    // extraBufferCapacity = 1 so finishGame()'s emit doesn't suspend if the screen has
+    // navigated away before the terminal event arrives (or in tests with no subscriber).
+    private val _events = MutableSharedFlow<CuddleStormEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<CuddleStormEvent> = _events.asSharedFlow()
 
     init { startGame() }

@@ -148,16 +148,26 @@ private fun EmotionMonster(tier: EmotionTier, tapCount: Int) {
         EmotionTier.HAPPY -> "🥰"
         EmotionTier.OVERJOYED -> "🤩"
     }
-    val tint = when (tier) {
-        EmotionTier.NEUTRAL -> Color.White.copy(alpha = 0.18f)
-        EmotionTier.PLEASED -> SoftLavender.copy(alpha = 0.25f)
-        EmotionTier.HAPPY -> PeachWarm.copy(alpha = 0.3f)
-        EmotionTier.OVERJOYED -> RarityGold.copy(alpha = 0.35f)
+    val tierColor = when (tier) {
+        EmotionTier.NEUTRAL -> Color.White
+        EmotionTier.PLEASED -> SoftLavender
+        EmotionTier.HAPPY -> PeachWarm
+        EmotionTier.OVERJOYED -> RarityGold
+    }
+    val haloAlpha = when (tier) {
+        EmotionTier.NEUTRAL -> 0.18f
+        EmotionTier.PLEASED -> 0.25f
+        EmotionTier.HAPPY -> 0.3f
+        EmotionTier.OVERJOYED -> 0.35f
     }
     Box(
         modifier = Modifier
             .padding(8.dp)
-            .background(brush = Brush.radialGradient(listOf(tint, Color.Transparent))),
+            .background(
+                brush = Brush.radialGradient(
+                    listOf(tierColor.copy(alpha = haloAlpha), Color.Transparent),
+                ),
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -168,7 +178,7 @@ private fun EmotionMonster(tier: EmotionTier, tapCount: Int) {
     Text(
         text = tier.label(),
         style = MaterialTheme.typography.labelMedium,
-        color = tint.copy(alpha = 1f),
+        color = tierColor,
     )
     Text(
         text = "$tapCount hugs",
@@ -217,7 +227,9 @@ private fun InstructionText(state: CuddleStormState) {
 @Composable
 private fun ParticleLayer(particles: List<HeartParticle>) {
     var nowMs by remember { mutableStateOf(System.currentTimeMillis()) }
-    LaunchedEffect(Unit) {
+    val hasParticles = particles.isNotEmpty()
+    LaunchedEffect(hasParticles) {
+        if (!hasParticles) return@LaunchedEffect
         while (true) {
             delay(16)
             nowMs = System.currentTimeMillis()

@@ -17,4 +17,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.lottie.compose)
+
+    testImplementation(project(":core:testing"))
 }

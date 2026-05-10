@@ -14,6 +14,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -50,6 +54,7 @@ fun MiniGamePlaceholderScreen(
     modifier: Modifier = Modifier,
     viewModel: PlaceholderGameViewModel = hiltViewModel(),
 ) {
+    var hasFinished by remember { mutableStateOf(false) }
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -78,12 +83,17 @@ fun MiniGamePlaceholderScreen(
             Spacer(Modifier.height(32.dp))
             Button(
                 onClick = {
+                    if (hasFinished) return@Button
+                    hasFinished = true
                     viewModel.completePlaceholderSession(gameId, onSessionComplete)
                 },
+                enabled = !hasFinished,
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = SoftLavender,
                     contentColor = DeepNight,
+                    disabledContainerColor = SoftLavender.copy(alpha = 0.4f),
+                    disabledContentColor = DeepNight.copy(alpha = 0.5f),
                 ),
             ) {
                 Text(text = "Finish session", fontWeight = FontWeight.Bold)
