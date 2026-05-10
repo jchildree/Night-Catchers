@@ -125,7 +125,7 @@ fun PinGateScreen(
 }
 
 @Composable
-private fun PinDots(filled: Int) {
+internal fun PinDots(filled: Int) {
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         repeat(4) { index ->
             Box(
@@ -139,7 +139,7 @@ private fun PinDots(filled: Int) {
 }
 
 @Composable
-private fun PinPad(
+internal fun PinPad(
     onDigit: (Char) -> Unit,
     onDelete: () -> Unit,
 ) {

@@ -101,6 +101,7 @@ class AnniversaryCheckWorker @AssistedInject constructor(
         const val WORK_NAME = "anniversary_check_worker"
         private const val CHANNEL_ID = "anniversary_alerts"
 
+        @JvmStatic
         fun buildRequest() = PeriodicWorkRequestBuilder<AnniversaryCheckWorker>(24, TimeUnit.HOURS)
             .build()
     }

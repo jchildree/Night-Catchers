@@ -30,6 +30,10 @@ val PetRoomBgBottom = Color(0xFF0D1420)
 val SurfaceDark = Color(0xFF12122A)
 val SurfaceVariant = Color(0xFF1A1A35)
 val MidnightPurple = Color(0xFF1E1040)
+val CosyCornerBg = Color(0xFF2D1B4E)
+val DreamRoomBgTop = Color(0xFF0D0A2E)
+val DreamRoomBgBottom = Color(0xFF050318)
+val FireflyGreen = Color(0xFF00FF88)
 
 // ── Text ──
 val OnSurface = Color(0xFFEDF4FC)

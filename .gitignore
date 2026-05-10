@@ -32,6 +32,9 @@ build/
 local.properties
 proguard/
 
+# Claude Code internals
+.claude/worktrees/
+
 # Misc
 *.orig
 *.bak
