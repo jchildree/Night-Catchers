@@ -46,4 +46,11 @@ sealed interface Dest {
     @Serializable object SettingsParent : Dest
     @Serializable object SettingsParentTime : Dest
     @Serializable object SettingsParentPinChange : Dest
+
+    // ── Tab graph markers (navigation<X> parent routes only) ──
+    @Serializable object MonsterGraph  : Dest
+    @Serializable object ScanGraph     : Dest
+    @Serializable object GamesGraph    : Dest
+    @Serializable object DexGraph      : Dest
+    @Serializable object SettingsGraph : Dest
 }

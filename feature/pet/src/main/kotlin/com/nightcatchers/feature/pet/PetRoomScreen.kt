@@ -450,11 +450,14 @@ private fun Mood.label(): String = when (this) {
 }
 
 private fun Mood.chipColor(): Color = when (this) {
-    Mood.CONTENT  -> MintFresh
-    Mood.EXCITED  -> ButteryYellow
-    Mood.LONELY   -> SkyBlue
-    Mood.GRUMPY   -> CoralAccent
-    Mood.SLEEPY   -> SoftLavender
-    Mood.PLAYFUL  -> PeachWarm
-    Mood.SPOOKED  -> MonsterPurple
+    Mood.CONTENT     -> MintFresh
+    Mood.EXCITED     -> ButteryYellow
+    Mood.ECSTATIC    -> ButteryYellow
+    Mood.LONELY      -> SkyBlue
+    Mood.GRUMPY      -> CoralAccent
+    Mood.SLEEPY      -> SoftLavender
+    Mood.PLAYFUL     -> PeachWarm
+    Mood.SPOOKED     -> MonsterPurple
+    Mood.MISSING_YOU -> MidnightPurple
+    Mood.BONDED      -> FireflyGreen
 }

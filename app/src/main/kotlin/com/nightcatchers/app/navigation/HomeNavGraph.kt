@@ -53,12 +53,12 @@ fun HomeNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Dest.Vault,
+        startDestination = Dest.MonsterGraph,
         modifier = modifier,
     ) {
 
         // ── Monsters tab (Vault + Pet, merged) ─────────────────────────────
-        navigation<Dest.Vault>(startDestination = Dest.Vault) {
+        navigation<Dest.MonsterGraph>(startDestination = Dest.Vault) {
             composable<Dest.Vault> {
                 VaultScreen(
                     onNavigateToPet = { monsterId -> navController.navigateToPet(monsterId) },
@@ -81,7 +81,7 @@ fun HomeNavGraph(
         }
 
         // ── Scan tab ───────────────────────────────────────────────────────
-        navigation<Dest.ScanCamera>(startDestination = Dest.ScanCamera) {
+        navigation<Dest.ScanGraph>(startDestination = Dest.ScanCamera) {
             composable<Dest.ScanCamera> {
                 ArScanScreen(
                     onNavigateToCapture = { archetypeId ->
@@ -107,7 +107,7 @@ fun HomeNavGraph(
         }
 
         // ── Games tab (top-level monster picker → PlayMenu → game) ─────────
-        navigation<Dest.Games>(startDestination = Dest.Games) {
+        navigation<Dest.GamesGraph>(startDestination = Dest.Games) {
             composable<Dest.Games> {
                 GamesPickerScreen(
                     onPickMonster = { monsterId ->
@@ -220,7 +220,7 @@ fun HomeNavGraph(
         }
 
         // ── Dex tab ────────────────────────────────────────────────────────
-        navigation<Dest.Dex>(startDestination = Dest.Dex) {
+        navigation<Dest.DexGraph>(startDestination = Dest.Dex) {
             composable<Dest.Dex> {
                 DexScreen(
                     onNavigateToDetail = { archetypeId ->
@@ -236,7 +236,7 @@ fun HomeNavGraph(
         }
 
         // ── Settings tab ───────────────────────────────────────────────────
-        navigation<Dest.Settings>(startDestination = Dest.Settings) {
+        navigation<Dest.SettingsGraph>(startDestination = Dest.Settings) {
             composable<Dest.Settings> {
                 SettingsScreen(
                     onNavigateToParental = { navController.navigate(Dest.SettingsParent) },
