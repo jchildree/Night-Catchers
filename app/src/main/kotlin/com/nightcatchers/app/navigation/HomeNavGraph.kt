@@ -32,14 +32,11 @@ import com.nightcatchers.core.domain.model.MiniGameId
 import com.nightcatchers.core.domain.model.MiniGameOutcome
 import com.nightcatchers.feature.pet.PetEvolveScreen
 import com.nightcatchers.feature.pet.PetRoomScreen
-import com.nightcatchers.feature.pet.minigames.GameResultScreen
-import com.nightcatchers.feature.pet.minigames.PlayMenuScreen
-import com.nightcatchers.feature.pet.minigames.cuddlestorm.CuddleStormGameScreen
-import com.nightcatchers.feature.pet.minigames.foodtoss.FoodTossGameScreen
-import com.nightcatchers.feature.pet.minigames.ghostdash.GhostDashGameScreen
-import com.nightcatchers.feature.pet.minigames.protonwrangle.ProtonWrangleGameScreen
-import com.nightcatchers.feature.pet.minigames.slimesort.SlimeSortGameScreen
-import com.nightcatchers.feature.pet.minigames.spooktag.SpookTagGameScreen
+import com.nightcatchers.feature.pet.play.CuddleStormScreen
+import com.nightcatchers.feature.pet.play.GamesPickerScreen
+import com.nightcatchers.feature.pet.play.MiniGamePlaceholderScreen
+import com.nightcatchers.feature.pet.play.MiniGameResultScreen
+import com.nightcatchers.feature.pet.play.PlayMenuScreen
 import com.nightcatchers.feature.vault.MonsterDetailScreen
 import com.nightcatchers.feature.vault.VaultScreen
 import com.nightcatchers.feature.dex.DexDetailScreen
@@ -139,7 +136,7 @@ fun HomeNavGraph(
                     monsterId = dest.monsterId,
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToEvolve = { id -> navController.navigateToEvolve(id) },
-                    onNavigateToPlay = { id -> navController.navigateToPlayMenu(id) },
+                    onNavigateToPlayMenu = { id -> navController.navigateToPlayMenu(id) },
                 )
             }
         }
@@ -165,63 +162,21 @@ fun HomeNavGraph(
                 navController.navigate(
                     Dest.PetPlayResult(
                         monsterId = dest.monsterId,
-                        onNavigateBack = { navController.popBackStack() },
-                        onNavigateToEvolve = { id -> navController.navigateToEvolve(id) },
-                        onNavigateToPlayMenu = { id ->
-                            navController.navigate(Dest.PetPlay(id, "menu"))
-                        },
-                    )
+                        game = gameId.slug,
+                        rawScore = outcome.rawScore,
+                        scoreBps = (outcome.scoreFraction * 10_000).toInt(),
+                    ),
+                ) {
+                    popUpTo(Dest.PetPlayMenu(dest.monsterId)) { inclusive = false }
                 }
             }
-            composable<Dest.PetPlay> { back ->
-                val dest = back.toRoute<Dest.PetPlay>()
-                val navigateToResult = {
-                    navController.navigate(Dest.PetPlay(dest.monsterId, "result")) {
-                        popUpTo(Dest.PetPlay(dest.monsterId, "menu")) { inclusive = false }
-                    }
-                }
-                when (dest.game) {
-                    "", "menu" -> PlayMenuScreen(
-                        monsterId = dest.monsterId,
-                        onNavigateToGame = { gameId ->
-                            navController.navigate(Dest.PetPlay(dest.monsterId, gameId))
-                        },
-                        onNavigateBack = { navController.popBackStack() },
-                    )
-                    "result" -> GameResultScreen(
-                        onPlayAgain = {
-                            navController.navigate(Dest.PetPlay(dest.monsterId, "menu")) {
-                                popUpTo(Dest.PetPlay(dest.monsterId, "menu")) { inclusive = true }
-                            }
-                        },
-                        onBack = { navController.popBackStack() },
-                    )
-                    "food-toss" -> FoodTossGameScreen(
-                        monsterId = dest.monsterId,
-                        onNavigateBack = navigateToResult,
-                    )
-                    "spook-tag" -> SpookTagGameScreen(
-                        monsterId = dest.monsterId,
-                        onNavigateBack = navigateToResult,
-                    )
-                    "cuddle-storm" -> CuddleStormGameScreen(
-                        monsterId = dest.monsterId,
-                        onNavigateBack = navigateToResult,
-                    )
-                    "slime-sort" -> SlimeSortGameScreen(
-                        monsterId = dest.monsterId,
-                        onNavigateBack = navigateToResult,
-                    )
-                    "ghost-dash" -> GhostDashGameScreen(
-                        monsterId = dest.monsterId,
-                        onNavigateBack = navigateToResult,
-                    )
-                    "proton-wrangle" -> ProtonWrangleGameScreen(
-                        monsterId = dest.monsterId,
-                        onNavigateBack = navigateToResult,
-                    )
-                    else -> PlaceholderScreen("🎮", "Mini-Game", "Unknown game type")
-                }
+            when (gameId) {
+                MiniGameId.CUDDLE_STORM -> CuddleStormScreen(onSessionComplete = onComplete)
+                else -> MiniGamePlaceholderScreen(
+                    gameId = gameId,
+                    onSessionComplete = onComplete,
+                    onCancel = { navController.popBackStack() },
+                )
             }
         }
         composable<Dest.PetPlayResult> { back ->

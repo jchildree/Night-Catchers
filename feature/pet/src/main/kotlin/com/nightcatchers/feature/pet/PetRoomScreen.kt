@@ -142,8 +142,6 @@ private fun PetRoomContent(
             Spacer(Modifier.height(20.dp))
             StatsPanel(state = state)
             Spacer(Modifier.height(16.dp))
-            PlayMiniGamesButton(onClick = onNavigateToPlay, enabled = !state.isInteracting)
-            Spacer(Modifier.height(16.dp))
             InteractionGrid(
                 state = state,
                 onInteract = onInteract,
@@ -354,29 +352,6 @@ private fun InteractionGrid(
             }
             Spacer(Modifier.height(10.dp))
         }
-    }
-}
-
-@Composable
-private fun PlayMiniGamesButton(
-    onClick: () -> Unit,
-    enabled: Boolean,
-) {
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = SoftLavender,
-            contentColor = DeepNight,
-            disabledContainerColor = SoftLavender.copy(alpha = 0.4f),
-            disabledContentColor = DeepNight.copy(alpha = 0.5f),
-        ),
-    ) {
-        Text(text = "🎮  Play mini-games", fontWeight = FontWeight.Bold)
     }
 }
 
