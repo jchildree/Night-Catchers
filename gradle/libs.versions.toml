@@ -1,6 +1,6 @@
 [versions]
 # Build tools
-agp = "8.7.3"
+agp = "8.13.2"
 kotlin = "2.0.21"
 ksp = "2.0.21-1.0.28"
 
@@ -33,7 +33,7 @@ coil = "2.7.0"
 
 # Data
 room = "2.7.0"
-sqlcipher-android = "4.5.7"
+sqlcipher-android = "4.6.1"
 firebase-bom = "33.7.0"
 
 # Network & Serialization
