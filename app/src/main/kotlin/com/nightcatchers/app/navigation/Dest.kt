@@ -22,7 +22,14 @@ sealed interface Dest {
 
     // ── Pet nested graph ──
     @Serializable data class PetRoom(val monsterId: String) : Dest
+    @Serializable data class PetPlayMenu(val monsterId: String) : Dest
     @Serializable data class PetPlay(val monsterId: String, val game: String) : Dest
+    @Serializable data class PetPlayResult(
+        val monsterId: String,
+        val game: String,
+        val rawScore: Int,
+        val scoreBps: Int, // scoreFraction * 10_000, integer-safe across nav
+    ) : Dest
     @Serializable data class PetEvolve(val monsterId: String) : Dest
 
     // ── Dex nested graph ──

@@ -74,6 +74,7 @@ fun PetRoomScreen(
     monsterId: String,
     onNavigateBack: () -> Unit,
     onNavigateToEvolve: (String) -> Unit = {},
+    onNavigateToPlay: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: PetViewModel = hiltViewModel(),
 ) {
@@ -103,6 +104,7 @@ fun PetRoomScreen(
                 state = s,
                 onInteract = viewModel::onInteract,
                 onDismissResult = viewModel::dismissInteractionResult,
+                onNavigateToPlay = { onNavigateToPlay(monsterId) },
             )
         }
     }
@@ -113,6 +115,7 @@ private fun PetRoomContent(
     state: PetUiState.Ready,
     onInteract: (PetInteraction) -> Unit,
     onDismissResult: () -> Unit,
+    onNavigateToPlay: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         RoomBackground(roomStage = state.roomStage)
@@ -129,7 +132,9 @@ private fun PetRoomContent(
             MonsterAvatarSection(state = state)
             Spacer(Modifier.height(20.dp))
             StatsPanel(state = state)
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(16.dp))
+            PlayMiniGamesButton(onClick = onNavigateToPlay, enabled = !state.isInteracting)
+            Spacer(Modifier.height(16.dp))
             InteractionGrid(
                 state = state,
                 onInteract = onInteract,
@@ -338,6 +343,29 @@ private fun InteractionGrid(
 }
 
 @Composable
+private fun PlayMiniGamesButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = SoftLavender,
+            contentColor = DeepNight,
+            disabledContainerColor = SoftLavender.copy(alpha = 0.4f),
+            disabledContentColor = DeepNight.copy(alpha = 0.5f),
+        ),
+    ) {
+        Text(text = "🎮  Play mini-games", fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
 private fun InteractionButton(
     label: String,
     emoji: String,
@@ -406,31 +434,40 @@ private fun RoomStage.nextLabel(): String = when (this) {
 }
 
 private fun Mood.emoji(): String = when (this) {
-    Mood.CONTENT  -> "😊"
-    Mood.EXCITED  -> "🤩"
-    Mood.LONELY   -> "😢"
-    Mood.GRUMPY   -> "😤"
-    Mood.SLEEPY   -> "😴"
-    Mood.PLAYFUL  -> "😜"
-    Mood.SPOOKED  -> "😱"
+    Mood.CONTENT     -> "😊"
+    Mood.EXCITED     -> "🤩"
+    Mood.LONELY      -> "😢"
+    Mood.GRUMPY      -> "😤"
+    Mood.SLEEPY      -> "😴"
+    Mood.PLAYFUL     -> "😜"
+    Mood.SPOOKED     -> "😱"
+    Mood.MISSING_YOU -> "🥺"
+    Mood.BONDED      -> "💞"
+    Mood.ECSTATIC    -> "🥳"
 }
 
 private fun Mood.label(): String = when (this) {
-    Mood.CONTENT  -> "Content"
-    Mood.EXCITED  -> "Excited"
-    Mood.LONELY   -> "Lonely"
-    Mood.GRUMPY   -> "Grumpy"
-    Mood.SLEEPY   -> "Sleepy"
-    Mood.PLAYFUL  -> "Playful"
-    Mood.SPOOKED  -> "Spooked"
+    Mood.CONTENT     -> "Content"
+    Mood.EXCITED     -> "Excited"
+    Mood.LONELY      -> "Lonely"
+    Mood.GRUMPY      -> "Grumpy"
+    Mood.SLEEPY      -> "Sleepy"
+    Mood.PLAYFUL     -> "Playful"
+    Mood.SPOOKED     -> "Spooked"
+    Mood.MISSING_YOU -> "Missing You"
+    Mood.BONDED      -> "Bonded"
+    Mood.ECSTATIC    -> "Ecstatic"
 }
 
 private fun Mood.chipColor(): Color = when (this) {
-    Mood.CONTENT  -> MintFresh
-    Mood.EXCITED  -> ButteryYellow
-    Mood.LONELY   -> SkyBlue
-    Mood.GRUMPY   -> Color(0xFFFF6F61)
-    Mood.SLEEPY   -> SoftLavender
-    Mood.PLAYFUL  -> PeachWarm
-    Mood.SPOOKED  -> MonsterPurple
+    Mood.CONTENT     -> MintFresh
+    Mood.EXCITED     -> ButteryYellow
+    Mood.LONELY      -> SkyBlue
+    Mood.GRUMPY      -> Color(0xFFFF6F61)
+    Mood.SLEEPY      -> SoftLavender
+    Mood.PLAYFUL     -> PeachWarm
+    Mood.SPOOKED     -> MonsterPurple
+    Mood.MISSING_YOU -> SkyBlue
+    Mood.BONDED      -> SoftLavender
+    Mood.ECSTATIC    -> ButteryYellow
 }

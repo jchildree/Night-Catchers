@@ -8,6 +8,7 @@ import com.nightcatchers.core.data.local.entity.toEntity
 import com.nightcatchers.core.domain.model.PetInteraction
 import com.nightcatchers.core.domain.model.PetState
 import com.nightcatchers.core.domain.model.PetStats
+import com.nightcatchers.core.domain.model.StatDelta
 import com.nightcatchers.core.domain.repository.PetRepository
 import com.nightcatchers.core.domain.usecase.GetMoodStateUseCase
 import kotlinx.coroutines.CoroutineDispatcher
@@ -50,6 +51,22 @@ class PetRepositoryImpl @Inject constructor(
             newState
         }
 
+    override suspend fun applyStatDelta(monsterId: String, delta: StatDelta): PetState =
+        withContext(ioDispatcher) {
+            val current = dao.getByMonsterId(monsterId)?.toDomain()
+                ?: error("No pet state for $monsterId")
+            val updated = current.stats.applyDelta(delta)
+            val now = Instant.now()
+            val newState = current.copy(
+                stats = updated,
+                mood = getMoodState(updated, now),
+                lastInteractedAt = now,
+                updatedAt = now,
+            )
+            dao.insert(newState.toEntity())
+            newState
+        }
+
     override suspend fun applyDecay(monsterId: String): PetState = withContext(ioDispatcher) {
         val current = dao.getByMonsterId(monsterId)?.toDomain()
             ?: error("No pet state for $monsterId")
@@ -68,6 +85,14 @@ class PetRepositoryImpl @Inject constructor(
         dao.insert(newState.toEntity())
         newState
     }
+
+    private fun PetStats.applyDelta(delta: StatDelta): PetStats = copy(
+        hunger = (hunger + delta.hunger).coerceIn(0, 100),
+        happiness = (happiness + delta.happiness).coerceIn(0, 100),
+        energy = (energy + delta.energy).coerceIn(0, 100),
+        spookiness = (spookiness + delta.spookiness).coerceIn(0, 100),
+        trust = (trust + delta.trust).coerceIn(0, 100),
+    )
 
     private fun applyInteractionToStats(stats: PetStats, interaction: PetInteraction): PetStats =
         when (interaction) {

@@ -68,3 +68,7 @@ fun NavHostController.navigateToPetAfterCapture(monsterId: String) {
 fun NavHostController.navigateToEvolve(monsterId: String) {
     navigate(Dest.PetEvolve(monsterId)) { launchSingleTop = true }
 }
+
+fun NavHostController.navigateToPlayMenu(monsterId: String) {
+    navigate(Dest.PetPlayMenu(monsterId)) { launchSingleTop = true }
+}

@@ -207,9 +207,10 @@ private fun RarityChip(rarity: Rarity) {
 @Composable
 private fun MoodLabel(mood: Mood) {
     val emoji = when (mood) {
-        Mood.CONTENT -> "😊"; Mood.EXCITED -> "🤩"; Mood.LONELY -> "😢"
-        Mood.GRUMPY  -> "😤"; Mood.SLEEPY -> "😴"; Mood.PLAYFUL -> "😜"
-        Mood.SPOOKED -> "😱"
+        Mood.CONTENT     -> "😊"; Mood.EXCITED     -> "🤩"; Mood.LONELY      -> "😢"
+        Mood.GRUMPY      -> "😤"; Mood.SLEEPY      -> "😴"; Mood.PLAYFUL     -> "😜"
+        Mood.SPOOKED     -> "😱"; Mood.MISSING_YOU -> "🥺"; Mood.BONDED      -> "💞"
+        Mood.ECSTATIC    -> "🥳"
     }
     Text(
         text = "$emoji ${mood.name.lowercase().replaceFirstChar { it.uppercase() }}",
