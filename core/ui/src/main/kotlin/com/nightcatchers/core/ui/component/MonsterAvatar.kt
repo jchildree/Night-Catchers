@@ -92,33 +92,42 @@ fun MonsterAvatar(
 }
 
 private fun Mood?.animDuration(): Int = when (this) {
-    Mood.EXCITED -> 600
-    Mood.PLAYFUL -> 700
-    Mood.SPOOKED -> 80
-    Mood.SLEEPY  -> 2200
-    Mood.LONELY  -> 2000
-    Mood.GRUMPY  -> 900
-    Mood.CONTENT -> 1200
-    null         -> 1200
+    Mood.EXCITED     -> 600
+    Mood.ECSTATIC    -> 500
+    Mood.PLAYFUL     -> 700
+    Mood.SPOOKED     -> 80
+    Mood.SLEEPY      -> 2200
+    Mood.LONELY      -> 2000
+    Mood.MISSING_YOU -> 2400
+    Mood.GRUMPY      -> 900
+    Mood.CONTENT     -> 1200
+    Mood.BONDED      -> 900
+    null             -> 1200
 }
 
 private fun Mood?.scaleTarget(): Float = when (this) {
-    Mood.EXCITED -> 1.10f
-    Mood.PLAYFUL -> 1.08f
-    Mood.SPOOKED -> 1.04f
-    Mood.SLEEPY  -> 1.02f
-    Mood.LONELY  -> 1.02f
-    Mood.GRUMPY  -> 1.05f
-    Mood.CONTENT -> 1.06f
-    null         -> 1.06f
+    Mood.EXCITED     -> 1.10f
+    Mood.ECSTATIC    -> 1.14f
+    Mood.PLAYFUL     -> 1.08f
+    Mood.SPOOKED     -> 1.04f
+    Mood.SLEEPY      -> 1.02f
+    Mood.LONELY      -> 1.02f
+    Mood.MISSING_YOU -> 1.01f
+    Mood.GRUMPY      -> 1.05f
+    Mood.CONTENT     -> 1.06f
+    Mood.BONDED      -> 1.08f
+    null             -> 1.06f
 }
 
 private fun Mood.badgeEmoji(): String = when (this) {
-    Mood.CONTENT -> "😊"
-    Mood.EXCITED -> "🤩"
-    Mood.LONELY  -> "😢"
-    Mood.GRUMPY  -> "😤"
-    Mood.SLEEPY  -> "😴"
-    Mood.PLAYFUL -> "😜"
-    Mood.SPOOKED -> "😱"
+    Mood.CONTENT     -> "😊"
+    Mood.EXCITED     -> "🤩"
+    Mood.LONELY      -> "😢"
+    Mood.GRUMPY      -> "😤"
+    Mood.SLEEPY      -> "😴"
+    Mood.PLAYFUL     -> "😜"
+    Mood.SPOOKED     -> "😱"
+    Mood.MISSING_YOU -> "🥺"
+    Mood.BONDED      -> "💞"
+    Mood.ECSTATIC    -> "🥳"
 }

@@ -290,11 +290,14 @@ private fun Rarity.color(): Color = when (this) {
 }
 
 private fun Mood.emoji(): String = when (this) {
-    Mood.CONTENT  -> "😊"
-    Mood.EXCITED  -> "🤩"
-    Mood.LONELY   -> "😢"
-    Mood.GRUMPY   -> "😤"
-    Mood.SLEEPY   -> "😴"
-    Mood.PLAYFUL  -> "😜"
-    Mood.SPOOKED  -> "😱"
+    Mood.CONTENT     -> "😊"
+    Mood.EXCITED     -> "🤩"
+    Mood.LONELY      -> "😢"
+    Mood.GRUMPY      -> "😤"
+    Mood.SLEEPY      -> "😴"
+    Mood.PLAYFUL     -> "😜"
+    Mood.SPOOKED     -> "😱"
+    Mood.MISSING_YOU -> "🥺"
+    Mood.BONDED      -> "💞"
+    Mood.ECSTATIC    -> "🥳"
 }

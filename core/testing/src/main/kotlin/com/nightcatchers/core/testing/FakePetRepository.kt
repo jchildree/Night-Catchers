@@ -5,6 +5,7 @@ import com.nightcatchers.core.domain.model.Mood
 import com.nightcatchers.core.domain.model.PetInteraction
 import com.nightcatchers.core.domain.model.PetState
 import com.nightcatchers.core.domain.model.PetStats
+import com.nightcatchers.core.domain.model.StatDelta
 import com.nightcatchers.core.domain.repository.PetRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +30,23 @@ class FakePetRepository : PetRepository {
         val current = states.value[monsterId] ?: defaultState(monsterId)
         val updated = current.copy(
             stats = applyInteractionToStats(current.stats, interaction),
+            lastInteractedAt = Instant.now(),
+            updatedAt = Instant.now(),
+        )
+        savePetState(updated)
+        return updated
+    }
+
+    override suspend fun applyStatDelta(monsterId: String, delta: StatDelta): PetState {
+        val current = states.value[monsterId] ?: defaultState(monsterId)
+        val updated = current.copy(
+            stats = current.stats.copy(
+                hunger = (current.stats.hunger + delta.hunger).coerceIn(0, 100),
+                happiness = (current.stats.happiness + delta.happiness).coerceIn(0, 100),
+                energy = (current.stats.energy + delta.energy).coerceIn(0, 100),
+                spookiness = (current.stats.spookiness + delta.spookiness).coerceIn(0, 100),
+                trust = (current.stats.trust + delta.trust).coerceIn(0, 100),
+            ),
             lastInteractedAt = Instant.now(),
             updatedAt = Instant.now(),
         )

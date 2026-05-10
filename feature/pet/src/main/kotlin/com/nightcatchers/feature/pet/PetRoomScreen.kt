@@ -141,7 +141,7 @@ private fun PetRoomContent(
             MonsterAvatarSection(state = state)
             Spacer(Modifier.height(20.dp))
             StatsPanel(state = state)
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(16.dp))
             InteractionGrid(
                 state = state,
                 onInteract = onInteract,
@@ -424,23 +424,29 @@ private fun RoomStage.nextLabel(): String = when (this) {
 }
 
 private fun Mood.emoji(): String = when (this) {
-    Mood.CONTENT  -> "😊"
-    Mood.EXCITED  -> "🤩"
-    Mood.LONELY   -> "😢"
-    Mood.GRUMPY   -> "😤"
-    Mood.SLEEPY   -> "😴"
-    Mood.PLAYFUL  -> "😜"
-    Mood.SPOOKED  -> "😱"
+    Mood.CONTENT     -> "😊"
+    Mood.EXCITED     -> "🤩"
+    Mood.LONELY      -> "😢"
+    Mood.GRUMPY      -> "😤"
+    Mood.SLEEPY      -> "😴"
+    Mood.PLAYFUL     -> "😜"
+    Mood.SPOOKED     -> "😱"
+    Mood.MISSING_YOU -> "🥺"
+    Mood.BONDED      -> "💞"
+    Mood.ECSTATIC    -> "🥳"
 }
 
 private fun Mood.label(): String = when (this) {
-    Mood.CONTENT  -> "Content"
-    Mood.EXCITED  -> "Excited"
-    Mood.LONELY   -> "Lonely"
-    Mood.GRUMPY   -> "Grumpy"
-    Mood.SLEEPY   -> "Sleepy"
-    Mood.PLAYFUL  -> "Playful"
-    Mood.SPOOKED  -> "Spooked"
+    Mood.CONTENT     -> "Content"
+    Mood.EXCITED     -> "Excited"
+    Mood.LONELY      -> "Lonely"
+    Mood.GRUMPY      -> "Grumpy"
+    Mood.SLEEPY      -> "Sleepy"
+    Mood.PLAYFUL     -> "Playful"
+    Mood.SPOOKED     -> "Spooked"
+    Mood.MISSING_YOU -> "Missing You"
+    Mood.BONDED      -> "Bonded"
+    Mood.ECSTATIC    -> "Ecstatic"
 }
 
 private fun Mood.chipColor(): Color = when (this) {
