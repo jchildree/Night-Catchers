@@ -51,6 +51,18 @@ class IsMiniGameUnlockedUseCaseTest {
         useCase(MiniGameId.CUDDLE_STORM, stats) shouldBe UnlockState.Unlocked
     }
 
+    @Test
+    fun `food toss locked when monster is too full`() {
+        val result = useCase(MiniGameId.FOOD_TOSS, stats(energy = 50, hunger = 90))
+        result.shouldBeInstanceOf<UnlockState.Locked>()
+        result.reason shouldBe LockReason.TooFull
+    }
+
+    @Test
+    fun `food toss unlocked just below full threshold`() {
+        useCase(MiniGameId.FOOD_TOSS, stats(energy = 50, hunger = 89)) shouldBe UnlockState.Unlocked
+    }
+
     private fun stats(
         hunger: Int = 50,
         happiness: Int = 50,

@@ -31,7 +31,7 @@ sealed interface Dest {
         val monsterId: String,
         val game: String,
         val rawScore: Int,
-        val scoreBps: Int, // scoreFraction * 10_000, integer-safe across nav
+        val scoreBps: Int, // basis points: integer-safe serialization of scoreFraction across nav
     ) : Dest
     @Serializable data class PetEvolve(val monsterId: String) : Dest
 

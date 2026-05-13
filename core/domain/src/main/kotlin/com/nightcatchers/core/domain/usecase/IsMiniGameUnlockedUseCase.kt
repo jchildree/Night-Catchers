@@ -9,7 +9,8 @@ import javax.inject.Inject
  * Energy-gating rules from Section 19:
  * - SKILL games require Energy ≥ 25.
  * - BONDING games require Energy ≥ 10, except for critical-stat overrides:
- *   - Food Toss is always unlocked when Hunger < 15.
+ *   - Food Toss is always unlocked when Hunger < 15 (starving).
+ *   - Food Toss is locked when Hunger ≥ 90 (TooFull — no point feeding a full monster).
  *   - Cuddle Storm is always unlocked when Trust < 10 (newly captured monsters).
  *
  * The "Gentle Mode" override that disables all gating lives at the profile layer; this use
@@ -32,6 +33,7 @@ class IsMiniGameUnlockedUseCase @Inject constructor() {
 
     private fun criticalOverride(gameId: MiniGameId, stats: PetStats): UnlockState? = when {
         gameId == MiniGameId.FOOD_TOSS && stats.hunger < CRITICAL_HUNGER -> UnlockState.Unlocked
+        gameId == MiniGameId.FOOD_TOSS && stats.hunger >= FULL_HUNGER -> UnlockState.Locked(reason = LockReason.TooFull)
         gameId == MiniGameId.CUDDLE_STORM && stats.trust < CRITICAL_TRUST -> UnlockState.Unlocked
         else -> null
     }
@@ -43,12 +45,14 @@ class IsMiniGameUnlockedUseCase @Inject constructor() {
 
     sealed interface LockReason {
         data class LowEnergy(val required: Int, val current: Int) : LockReason
+        data object TooFull : LockReason
     }
 
     private companion object {
         const val SKILL_MIN_ENERGY = 25
         const val BONDING_MIN_ENERGY = 10
         const val CRITICAL_HUNGER = 15
+        const val FULL_HUNGER = 90
         const val CRITICAL_TRUST = 10
     }
 }

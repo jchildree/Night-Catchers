@@ -120,9 +120,9 @@ data class MiniGameOutcome(
      * gets *something*) plus the full energy cost.
      */
     fun statDelta(): StatDelta {
-        val scaled = baseRewardScale().let { scale -> gameId.baseRewards * scale }
+        val scaled = gameId.baseRewards * baseRewardScale()
         return scaled.copy(energy = -gameId.energyCost)
     }
 
-    private fun baseRewardScale(): Float = (0.25f + 0.75f * scoreFraction).coerceIn(0.25f, 1f)
+    private fun baseRewardScale(): Float = 0.25f + 0.75f * scoreFraction
 }

@@ -33,10 +33,12 @@ import com.nightcatchers.core.domain.model.MiniGameOutcome
 import com.nightcatchers.feature.pet.PetEvolveScreen
 import com.nightcatchers.feature.pet.PetRoomScreen
 import com.nightcatchers.feature.pet.play.CuddleStormScreen
+import com.nightcatchers.feature.pet.play.FoodTossScreen
 import com.nightcatchers.feature.pet.play.GamesPickerScreen
 import com.nightcatchers.feature.pet.play.MiniGamePlaceholderScreen
 import com.nightcatchers.feature.pet.play.MiniGameResultScreen
 import com.nightcatchers.feature.pet.play.PlayMenuScreen
+import com.nightcatchers.feature.pet.play.SpookTagScreen
 import com.nightcatchers.feature.vault.MonsterDetailScreen
 import com.nightcatchers.feature.vault.VaultScreen
 import com.nightcatchers.feature.dex.DexDetailScreen
@@ -172,6 +174,8 @@ fun HomeNavGraph(
             }
             when (gameId) {
                 MiniGameId.CUDDLE_STORM -> CuddleStormScreen(onSessionComplete = onComplete)
+                MiniGameId.FOOD_TOSS -> FoodTossScreen(onSessionComplete = onComplete)
+                MiniGameId.SPOOK_TAG -> SpookTagScreen(onSessionComplete = onComplete)
                 else -> MiniGamePlaceholderScreen(
                     gameId = gameId,
                     onSessionComplete = onComplete,

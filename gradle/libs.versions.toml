@@ -1,8 +1,8 @@
 [versions]
 # Build tools
-agp = "8.13.2"
-kotlin = "2.0.21"
-ksp = "2.0.21-1.0.28"
+agp = "9.2.1"
+kotlin = "2.2.10"
+ksp = "2.3.2"
 
 # AndroidX
 core-ktx = "1.15.0"
@@ -19,7 +19,7 @@ compose-bom = "2024.12.01"
 compose-compiler = "1.5.14"
 
 # Hilt
-hilt = "2.51.1"
+hilt = "2.59.2"
 hilt-navigation-compose = "1.2.0"
 
 # AR & Camera
