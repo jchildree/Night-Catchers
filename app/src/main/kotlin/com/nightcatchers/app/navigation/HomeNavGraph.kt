@@ -33,10 +33,12 @@ import com.nightcatchers.core.domain.model.MiniGameOutcome
 import com.nightcatchers.feature.pet.PetEvolveScreen
 import com.nightcatchers.feature.pet.PetRoomScreen
 import com.nightcatchers.feature.pet.play.CuddleStormScreen
+import com.nightcatchers.feature.pet.play.FoodTossScreen
 import com.nightcatchers.feature.pet.play.GamesPickerScreen
 import com.nightcatchers.feature.pet.play.MiniGamePlaceholderScreen
 import com.nightcatchers.feature.pet.play.MiniGameResultScreen
 import com.nightcatchers.feature.pet.play.PlayMenuScreen
+import com.nightcatchers.feature.pet.play.SpookTagScreen
 import com.nightcatchers.feature.vault.MonsterDetailScreen
 import com.nightcatchers.feature.vault.VaultScreen
 import com.nightcatchers.feature.dex.DexDetailScreen
@@ -53,12 +55,12 @@ fun HomeNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Dest.Vault,
+        startDestination = Dest.MonsterGraph,
         modifier = modifier,
     ) {
 
         // ── Monsters tab (Vault + Pet, merged) ─────────────────────────────
-        navigation<Dest.Vault>(startDestination = Dest.Vault) {
+        navigation<Dest.MonsterGraph>(startDestination = Dest.Vault) {
             composable<Dest.Vault> {
                 VaultScreen(
                     onNavigateToPet = { monsterId -> navController.navigateToPet(monsterId) },
@@ -81,7 +83,7 @@ fun HomeNavGraph(
         }
 
         // ── Scan tab ───────────────────────────────────────────────────────
-        navigation<Dest.ScanCamera>(startDestination = Dest.ScanCamera) {
+        navigation<Dest.ScanGraph>(startDestination = Dest.ScanCamera) {
             composable<Dest.ScanCamera> {
                 ArScanScreen(
                     onNavigateToCapture = { archetypeId ->
@@ -107,7 +109,7 @@ fun HomeNavGraph(
         }
 
         // ── Games tab (top-level monster picker → PlayMenu → game) ─────────
-        navigation<Dest.Games>(startDestination = Dest.Games) {
+        navigation<Dest.GamesGraph>(startDestination = Dest.Games) {
             composable<Dest.Games> {
                 GamesPickerScreen(
                     onPickMonster = { monsterId ->
@@ -172,6 +174,8 @@ fun HomeNavGraph(
             }
             when (gameId) {
                 MiniGameId.CUDDLE_STORM -> CuddleStormScreen(onSessionComplete = onComplete)
+                MiniGameId.FOOD_TOSS -> FoodTossScreen(onSessionComplete = onComplete)
+                MiniGameId.SPOOK_TAG -> SpookTagScreen(onSessionComplete = onComplete)
                 else -> MiniGamePlaceholderScreen(
                     gameId = gameId,
                     onSessionComplete = onComplete,
@@ -220,7 +224,7 @@ fun HomeNavGraph(
         }
 
         // ── Dex tab ────────────────────────────────────────────────────────
-        navigation<Dest.Dex>(startDestination = Dest.Dex) {
+        navigation<Dest.DexGraph>(startDestination = Dest.Dex) {
             composable<Dest.Dex> {
                 DexScreen(
                     onNavigateToDetail = { archetypeId ->
@@ -236,7 +240,7 @@ fun HomeNavGraph(
         }
 
         // ── Settings tab ───────────────────────────────────────────────────
-        navigation<Dest.Settings>(startDestination = Dest.Settings) {
+        navigation<Dest.SettingsGraph>(startDestination = Dest.Settings) {
             composable<Dest.Settings> {
                 SettingsScreen(
                     onNavigateToParental = { navController.navigate(Dest.SettingsParent) },

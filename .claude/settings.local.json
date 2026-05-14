@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(./gradlew :app:compileDebugKotlin)",
+      "Bash(gh pr *)",
+      "Bash(./gradlew :core:data:compileDebugKotlin)",
+      "Bash(xargs grep -l \"MiniGameId\")",
+      "Bash(Get-ChildItem *)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(./gradlew :feature:pet:compileDebugKotlin :app:compileDebugKotlin)"
+    ]
+  }
+}

@@ -7,16 +7,16 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-internal fun Project.configureAndroidCommon(extension: CommonExtension<*, *, *, *, *, *>) {
+internal fun Project.configureAndroidCommon(extension: CommonExtension) {
     extension.apply {
         compileSdk = 35
 
-        defaultConfig {
+        defaultConfig.apply {
             minSdk = 26
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
 
-        compileOptions {
+        compileOptions.apply {
             sourceCompatibility = JavaVersion.VERSION_17
             targetCompatibility = JavaVersion.VERSION_17
             isCoreLibraryDesugaringEnabled = true

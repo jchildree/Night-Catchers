@@ -29,6 +29,7 @@ class NightCatchersApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        System.loadLibrary("sqlcipher")
         initFirebaseAppCheck()
         scheduleBackgroundWorkers()
     }

@@ -17,10 +17,11 @@ core/
 feature/
   ar/                         # CameraX pipeline, ARCore, MonsterSpawnEngine
   capture/                    # Capture ritual UI + CaptureViewModel state machine
+  dex/                        # Monster Dex, achievements, shareable cards
   filters/                    # FilterLayerManager, ShaderProgramCache, GLSL shaders
   onboarding/                 # First-run flow, permission requests
   parental/                   # PIN gate, parental dashboard
-  pet/                        # Pet stats, mood engine, mini-games
+  pet/                        # Pet stats, mood engine, mini-games, workers
   vault/                      # Monster collection, containment unit
 build-logic/                  # Convention plugins (android-library, hilt, compose, etc.)
 ```
@@ -57,6 +58,7 @@ All dependency versions live in `gradle/libs.versions.toml`. Never hardcode vers
 - **Use cases**: Business logic lives in `:core:domain` use cases. ViewModels call use cases, not repositories.
 - **No Android in domain**: `:core:domain` has zero Android dependencies. Pure Kotlin only.
 - **Hilt injection**: All ViewModels are `@HiltViewModel`. All Workers are `@HiltWorker`.
+- **Offline-first**: Room is the source of truth. Firestore is a write-behind sync target (conflict-resolved by `updatedAt` server timestamp). ViewModels never read from Firestore directly.
 
 ## COPPA Invariants (never violate)
 
@@ -74,6 +76,7 @@ All dependency versions live in `gradle/libs.versions.toml`. Never hardcode vers
 - `AuditEvent.prevHash` forms a SHA-256 tamper chain — never skip seq numbers.
 - File sharing uses FileProvider only — never raw file:// URIs.
 - Firebase App Check (Play Integrity) initialised in `NightCatchersApplication`.
+- Soft-delete pattern for released monsters: set `isReleased = true`, 30-day recovery window for parents.
 
 ## Device Tiers
 
@@ -83,7 +86,7 @@ All dependency versions live in `gradle/libs.versions.toml`. Never hardcode vers
 | B | ≥3 GB RAM + OpenGL ES 3.0 | Max 2 FBO passes, half res |
 | C | < 3 GB RAM or no OpenGL ES 3.0 | No OpenGL — Lottie fallback |
 
-Emergency downgrade: 3 consecutive frames > 20ms triggers tier fallback in `FilterLayerManager`.
+Emergency downgrade: 3 consecutive frames > 20ms triggers tier fallback in `FilterLayerManager`. AR degradation is always silent — never show capability errors to a child.
 
 ## Lens Composition Rules (Section 17)
 
@@ -106,6 +109,35 @@ Emergency downgrade: 3 consecutive frames > 20ms triggers tier fallback in `Filt
 
 Stats clamp 0–100. Decay runs every 4 hours via `StatDecayWorker`: hunger −4, happiness −3, energy −2, spookiness +1 per cycle. Only applied to non-released monsters (`isReleased == false`).
 
+## Mini-Games (Section 19)
+
+Mini-game results flow through `ApplyMiniGameOutcomeUseCase` → `PetRepository.applyStatDelta()`. Game ViewModels never write stats directly.
+
+### Roster
+
+| ID | Tier | Energy cost | Base rewards |
+| -- | ---- | ----------- | ------------ |
+| `FOOD_TOSS` | BONDING | 10 | hunger +25, happiness +10 |
+| `SPOOK_TAG` | BONDING | 20 | happiness +20, spookiness +15 |
+| `CUDDLE_STORM` | BONDING | 15 | happiness +30, trust +8, spookiness -10 |
+| `SLIME_SORT` | SKILL | 15 | happiness +20, trust +10, spookiness -5 |
+| `GHOST_DASH` | SKILL | 20 | happiness +15, trust +5, spookiness +25 |
+| `PROTON_WRANGLE` | SKILL | 25 | happiness +10, trust +20, spookiness +10 |
+
+Rewards scale by `scoreFraction` (0.0–1.0) with a 25% floor: `scale = 0.25 + 0.75 * scoreFraction`. Energy cost is always paid in full regardless of score.
+
+### Unlock Gating (`IsMiniGameUnlockedUseCase`)
+
+- SKILL games require `energy ≥ 25`.
+- BONDING games require `energy ≥ 10`, except:
+  - `FOOD_TOSS` is always unlocked when `hunger < 15` (starving override).
+  - `FOOD_TOSS` is locked when `hunger ≥ 90` (TooFull — no point feeding a full monster).
+  - `CUDDLE_STORM` is always unlocked when `trust < 10` (newly captured).
+
+### Score Serialisation Across Navigation
+
+`PetPlay` → `PetPlayResult` passes `scoreBps` (integer basis points = `scoreFraction * 10_000`) to avoid floating-point in nav args.
+
 ## Mood Priority (GetMoodStateUseCase)
 
 Signature: `invoke(stats: PetStats, lastInteractedAt: Instant = Instant.now()): Mood`
@@ -125,6 +157,61 @@ Evaluated top-to-bottom, first match wins:
 
 `PetViewModel` calls `getMoodState(petState.stats, petState.lastInteractedAt)` at display time so MISSING_YOU is computed live, not read from the stored mood field.
 
+## Bond Stage & Room Stage
+
+Both are driven by `trust` score (0–100). Trust only ever increases; it resets on release.
+
+### BondStage (`GetBondStageUseCase`)
+
+| Stage | Trust min | Unlocked interactions |
+| ----- | --------- | --------------------- |
+| STRANGER | 0 | Feed (throws only), Watch |
+| CURIOUS | 20 | Feed (any method), Shadow Dance |
+| FRIENDLY | 40 | Feed, Play (all), Lullaby Hum, Name |
+| BONDED | 60 | Spook Training, Diary, Accessories, Photo Mode |
+| BEST_FRIENDS | 80 | Evolve, Greeting, Comfort Mode, Friendship Card |
+
+### EvolutionStage
+
+| Stage | Trust gate |
+| ----- | ---------- |
+| BABY | 0 |
+| TEEN | 40 |
+| ADULT | 80 |
+
+### RoomStage (`GetRoomStageUseCase`) — pet room visual theme
+
+| Stage | Trust range | Room name |
+| ----- | ----------- | --------- |
+| HOLDING_PEN | 0–19 | The Holding Pen |
+| COSY_CORNER | 20–39 | The Cosy Corner |
+| BEDROOM | 40–59 | The Bedroom |
+| SANCTUARY | 60–79 | The Sanctuary |
+| DREAM_ROOM | 80–100 | The Dream Room |
+
+## Day Phase (`DayPhase`)
+
+Governs mini-game availability and stat bonuses (Section 18). `NIGHT` wraps midnight (21:00–05:59).
+
+| Phase | Hours |
+| ----- | ----- |
+| MORNING | 06:00–11:59 |
+| AFTERNOON | 12:00–17:59 |
+| EVENING | 18:00–20:59 |
+| NIGHT | 21:00–05:59 |
+
+## Account Tiers & Safety Policy
+
+`SafetyPolicy.evaluate()` returns `ALLOW`, `SOFT_BLOCK` (≤5 min from cap), or `HARD_BLOCK`.
+
+| Tier | Daily cap | Bedtime |
+| ---- | --------- | ------- |
+| CHILD | 30 min | 20:00–07:00 |
+| TEEN | 60 min | 22:00–07:00 |
+| ADULT | none | none |
+
+Bedtime triggers `HARD_BLOCK` for CHILD and TEEN tiers. ADULT has no cap or bedtime.
+
 ## Colour Tokens (never use raw hex in Composables)
 
 Capture mode: `SlimeGreen`, `EctoplasmCyan`, `DeepNight`, `MonsterPurple`, `RarityGold`
@@ -141,9 +228,11 @@ Routes defined in `app/navigation/Dest.kt` as `@Serializable sealed interface`:
 | Root | `Splash`, `Onboarding`, `Home` |
 | Scan | `ScanCamera`, `ScanFilters`, `ScanCapture(archetypeId)`, `ScanResult(monsterId)` |
 | Vault | `Vault`, `VaultDetail(monsterId)`, `VaultRelease(monsterId)` |
-| Pet | `PetRoom(monsterId)`, `PetPlay(monsterId, game)`, `PetEvolve(monsterId)` |
+| Games | `Games` (top-level picker) |
+| Pet | `PetRoom(monsterId)`, `PetPlayMenu(monsterId)`, `PetPlay(monsterId, game)`, `PetPlayResult(monsterId, game, rawScore, scoreBps)`, `PetEvolve(monsterId)` |
 | Dex | `Dex`, `DexDetail(archetypeId)`, `DexAchievement(achievementId)`, `DexShare(monsterId)` |
-| Settings | `Settings`, `SettingsParent`, `SettingsParentTime` |
+| Settings | `Settings`, `SettingsParent`, `SettingsParentTime`, `SettingsParentPinChange` |
+| Tab graphs | `MonsterGraph`, `ScanGraph`, `GamesGraph`, `DexGraph`, `SettingsGraph` (parent route markers only) |
 
 Use `navigateTo*` extension helpers from `NightCatchersNavGraph.kt` — don't build routes manually.
 Bottom-nav tabs use `saveState = true` / `restoreState = true`.
@@ -171,3 +260,5 @@ All workers are `@HiltWorker` with `@AssistedInject`. Scheduled on app creation 
 ## Reference
 
 `DESIGN_GUIDE.md` — visual system, AR filter catalogue, pet system details, and recommended build order. Consult before making visual or UX changes.
+
+`design-docs/section-19-play-minigames/` — detailed Section 19 mini-game design spec.

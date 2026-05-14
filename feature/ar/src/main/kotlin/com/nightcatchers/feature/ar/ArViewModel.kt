@@ -6,11 +6,14 @@ import com.nightcatchers.core.common.DeviceTier
 import com.nightcatchers.core.common.DeviceTierDetector
 import com.nightcatchers.core.domain.model.MonsterArchetype
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class ArViewModel @Inject constructor(
@@ -19,6 +22,15 @@ class ArViewModel @Inject constructor(
 ) : ViewModel() {
 
     val deviceTier: DeviceTier by lazy { tierDetector.detect().tier }
+
+    init {
+        if (deviceTier == DeviceTier.C) {
+            viewModelScope.launch {
+                delay(Random.nextLong(20_000L, 45_000L))
+                spawnEngine.emitTimerSpawn()
+            }
+        }
+    }
 
     val uiState: StateFlow<ArUiState> = spawnEngine.spawnEvents
         .map { event ->

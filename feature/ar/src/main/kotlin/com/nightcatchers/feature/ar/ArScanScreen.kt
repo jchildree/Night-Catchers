@@ -52,22 +52,25 @@ fun ArScanScreen(
     modifier: Modifier = Modifier,
     viewModel: ArViewModel = hiltViewModel(),
 ) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    if (viewModel.deviceTier == DeviceTier.C) {
+        TierCArScreen(
+            uiState = uiState,
+            onNavigateToCapture = onNavigateToCapture,
+            modifier = modifier,
+        )
+        return
+    }
+
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val cameraManager = remember { CameraManager() }
     val analysisExecutor = remember { Executors.newSingleThreadExecutor() }
     val analyzer = remember {
         MlKitObjectAnalyzer { objectCount ->
             viewModel.onFrameAvailable(System.currentTimeMillis(), objectCount > 0)
         }
-    }
-
-    // Check device tier — Tier C has no AR
-    if (viewModel.deviceTier == DeviceTier.C) {
-        TierCFallback()
-        return
     }
 
     DisposableEffect(Unit) {
@@ -87,7 +90,6 @@ fun ArScanScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // Camera preview — start/stop tied to compose lifecycle via DisposableEffect inside factory
         AndroidView(
             factory = { ctx ->
                 PreviewView(ctx).apply {
@@ -109,7 +111,6 @@ fun ArScanScreen(
             modifier = Modifier.fillMaxSize(),
         )
 
-        // Compose overlay layer
         when (val s = uiState) {
             is ArUiState.Scanning -> ScanningHud(modifier = Modifier.align(Alignment.BottomCenter))
             is ArUiState.MonsterSpawned -> MonsterDetectedOverlay(
@@ -215,24 +216,51 @@ private fun MonsterDetectedOverlay(
 }
 
 @Composable
-private fun TierCFallback() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "👾", fontSize = 64.sp)
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "AR requires a newer device",
-                style = MaterialTheme.typography.headlineSmall,
-                color = Color.White,
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "OpenGL ES 3.0 and ARCore are needed\nto hunt monsters in your room.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.5f),
+private fun TierCArScreen(
+    uiState: ArUiState,
+    onNavigateToCapture: (archetypeId: String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val ctx = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val cameraManager = remember { CameraManager() }
+
+    DisposableEffect(Unit) {
+        onDispose { cameraManager.release() }
+    }
+
+    LaunchedEffect(uiState) {
+        val s = uiState
+        if (s is ArUiState.MonsterSpawned) {
+            onNavigateToCapture(s.archetype.id)
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        AndroidView(
+            factory = { factoryCtx ->
+                PreviewView(factoryCtx).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                    )
+                    scaleType = PreviewView.ScaleType.FILL_CENTER
+                }.also { pv ->
+                    cameraManager.startPreviewOnly(
+                        context = ctx,
+                        lifecycleOwner = lifecycleOwner,
+                        previewView = pv,
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxSize(),
+        )
+
+        when (val s = uiState) {
+            is ArUiState.Scanning -> ScanningHud(modifier = Modifier.align(Alignment.BottomCenter))
+            is ArUiState.MonsterSpawned -> MonsterDetectedOverlay(
+                archetype = s.archetype,
+                modifier = Modifier.align(Alignment.Center),
             )
         }
     }

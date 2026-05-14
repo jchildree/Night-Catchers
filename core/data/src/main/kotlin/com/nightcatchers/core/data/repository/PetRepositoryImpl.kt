@@ -37,53 +37,42 @@ class PetRepositoryImpl @Inject constructor(
 
     override suspend fun applyInteraction(monsterId: String, interaction: PetInteraction): PetState =
         withContext(ioDispatcher) {
-            val current = dao.getByMonsterId(monsterId)?.toDomain()
-                ?: error("No pet state for $monsterId")
-            val updated = applyInteractionToStats(current.stats, interaction)
-            val now = Instant.now()
-            val newState = current.copy(
-                stats = updated,
-                mood = getMoodState(updated),
-                lastInteractedAt = now,
-                updatedAt = now,
-            )
-            dao.insert(newState.toEntity())
-            newState
+            updateAndSave(monsterId) { stats -> applyInteractionToStats(stats, interaction) }
         }
 
     override suspend fun applyStatDelta(monsterId: String, delta: StatDelta): PetState =
         withContext(ioDispatcher) {
-            val current = dao.getByMonsterId(monsterId)?.toDomain()
-                ?: error("No pet state for $monsterId")
-            val updated = current.stats.applyDelta(delta)
-            val now = Instant.now()
-            val newState = current.copy(
-                stats = updated,
-                mood = getMoodState(updated),
-                lastInteractedAt = now,
-                updatedAt = now,
-            )
-            dao.insert(newState.toEntity())
-            newState
+            updateAndSave(monsterId) { stats -> stats.applyDelta(delta) }
         }
 
-    override suspend fun applyDecay(monsterId: String): PetState = withContext(ioDispatcher) {
+    private suspend fun updateAndSave(
+        monsterId: String,
+        touchLastInteracted: Boolean = true,
+        updateStats: (PetStats) -> PetStats,
+    ): PetState {
         val current = dao.getByMonsterId(monsterId)?.toDomain()
             ?: error("No pet state for $monsterId")
-        val decayed = current.stats.copy(
-            hunger = (current.stats.hunger - 4).coerceAtLeast(0),
-            happiness = (current.stats.happiness - 3).coerceAtLeast(0),
-            energy = (current.stats.energy - 2).coerceAtLeast(0),
-            spookiness = (current.stats.spookiness + 1).coerceAtMost(100),
-        )
+        val updated = updateStats(current.stats)
         val now = Instant.now()
         val newState = current.copy(
-            stats = decayed,
-            mood = getMoodState(decayed),
+            stats = updated,
+            mood = getMoodState(updated),
+            lastInteractedAt = if (touchLastInteracted) now else current.lastInteractedAt,
             updatedAt = now,
         )
         dao.insert(newState.toEntity())
-        newState
+        return newState
+    }
+
+    override suspend fun applyDecay(monsterId: String): PetState = withContext(ioDispatcher) {
+        updateAndSave(monsterId, touchLastInteracted = false) { stats ->
+            stats.copy(
+                hunger = (stats.hunger - 4).coerceAtLeast(0),
+                happiness = (stats.happiness - 3).coerceAtLeast(0),
+                energy = (stats.energy - 2).coerceAtLeast(0),
+                spookiness = (stats.spookiness + 1).coerceAtMost(100),
+            )
+        }
     }
 
     private fun PetStats.applyDelta(delta: StatDelta): PetStats = copy(

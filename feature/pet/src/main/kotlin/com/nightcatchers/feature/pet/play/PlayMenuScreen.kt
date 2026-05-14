@@ -231,6 +231,8 @@ private fun LockedFooter(state: IsMiniGameUnlockedUseCase.UnlockState) {
             val text = when (val r = state.reason) {
                 is IsMiniGameUnlockedUseCase.LockReason.LowEnergy ->
                     "🔒 Needs Energy ≥ ${r.required} (now ${r.current})"
+
+                IsMiniGameUnlockedUseCase.LockReason.TooFull -> "🔒 Too full to eat right now"
             }
             Text(
                 text = text,

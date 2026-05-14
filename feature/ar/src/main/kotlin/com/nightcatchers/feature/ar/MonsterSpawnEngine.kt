@@ -45,6 +45,16 @@ class MonsterSpawnEngine @Inject constructor() {
         }
     }
 
+    fun emitTimerSpawn() {
+        _spawnEvents.tryEmit(
+            MonsterSpawnEvent.MonsterDetected(
+                archetype = pickWeightedRandom(),
+                screenX = Random.nextFloat(),
+                screenY = Random.nextFloat(),
+            ),
+        )
+    }
+
     private fun pickWeightedRandom(): MonsterArchetype {
         val pool = MonsterArchetypeCatalog.all
         val totalWeight = pool.sumOf { it.rarity.spawnWeight }
