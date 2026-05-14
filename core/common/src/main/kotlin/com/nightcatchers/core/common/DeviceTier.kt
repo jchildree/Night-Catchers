@@ -2,9 +2,9 @@ package com.nightcatchers.core.common
 
 /**
  * Device capability tiers that gate AR/shader features.
- * Tier A: flagship — full AR + all FBO shader passes
- * Tier B: mid-range — ARCore with max 2 FBO passes, half resolution
- * Tier C: low-end — no ARCore, 2D Lottie sprite overlay only
+ * Tier A: flagship — ≥6 GB RAM, ARCore required, OpenGL ES ≥ 3.1; full AR + all FBO shader passes
+ * Tier B: mid-range — ≥3 GB RAM, OpenGL ES ≥ 3.0 (ARCore not required); max 2 FBO passes, half resolution
+ * Tier C: low-end — everything else; no OpenGL — Lottie fallback only
  */
 enum class DeviceTier { A, B, C }
 

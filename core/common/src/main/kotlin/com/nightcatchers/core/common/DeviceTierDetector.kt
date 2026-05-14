@@ -3,7 +3,6 @@ package com.nightcatchers.core.common
 import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.opengl.EGL14
 import android.opengl.GLES20
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -18,19 +17,21 @@ class DeviceTierDetector @Inject constructor(
         val hasArCore = hasArCoreSupport()
         val glVersion = getOpenGlEsVersion()
 
-        val tier = when {
-            ram >= 6_000 && hasArCore && glVersion >= 3.0f -> DeviceTier.A
-            ram >= 3_000 && hasArCore && glVersion >= 2.0f -> DeviceTier.B
-            else -> DeviceTier.C
-        }
-
         return DeviceCapabilities(
-            tier = tier,
+            tier = classifyTier(ram, hasArCore, glVersion),
             totalRamMb = ram,
             supportsArCore = hasArCore,
             openGlEsVersion = glVersion,
             maxTextureSize = getMaxTextureSize(),
         )
+    }
+
+    companion object {
+        internal fun classifyTier(ram: Int, hasArCore: Boolean, glVersion: Float): DeviceTier = when {
+            ram >= 6_000 && hasArCore && glVersion >= 3.1f -> DeviceTier.A
+            ram >= 3_000 && glVersion >= 3.0f             -> DeviceTier.B
+            else                                          -> DeviceTier.C
+        }
     }
 
     private fun getRamMb(): Int {
