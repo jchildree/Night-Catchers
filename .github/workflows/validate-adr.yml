@@ -1,0 +1,107 @@
+name: Validate ADRs
+
+on:
+  pull_request:
+    paths:
+      - 'docs/adr/**'
+      - '.github/workflows/validate-adr.yml'
+  push:
+    paths:
+      - 'docs/adr/**'
+      - '.github/workflows/validate-adr.yml'
+
+concurrency:
+  group: validate-adr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: ADR format & index
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate ADRs
+        shell: bash
+        run: |
+          set -u
+          adr_dir="docs/adr"
+          index="$adr_dir/INDEX.md"
+          errors=0
+          fail() { echo "::error::$1"; errors=$((errors + 1)); }
+
+          if [ ! -d "$adr_dir" ]; then
+            echo "No $adr_dir directory; nothing to validate."
+            exit 0
+          fi
+          if [ ! -f "$index" ]; then
+            fail "Missing master index $index"
+          fi
+
+          # 1. No ADR files outside docs/adr/
+          stray=$(git ls-files | grep -E '(^|/)ADR-[0-9]+.*\.md$' | grep -v "^$adr_dir/" || true)
+          if [ -n "$stray" ]; then
+            fail "ADR files found outside $adr_dir/: $stray"
+          fi
+
+          numbers=""
+          adr_count=0
+          name_re='^ADR-[0-9]{3}-[a-z0-9]+(-[a-z0-9]+)*\.md$'
+
+          for f in "$adr_dir"/*.md; do
+            [ -e "$f" ] || continue
+            base=$(basename "$f")
+            case "$base" in
+              INDEX.md|_template.md) continue ;;
+            esac
+            adr_count=$((adr_count + 1))
+
+            # 2. Filename format (zero-padded, kebab-case)
+            if ! echo "$base" | grep -Eq "$name_re"; then
+              fail "Bad filename '$base' (expected ADR-###-kebab-case.md, 3-digit zero-padded)"
+              continue
+            fi
+
+            num=$(echo "$base" | sed -E 's/^ADR-([0-9]{3}).*/\1/')
+            case " $numbers " in
+              *" $num "*) fail "Duplicate ADR number $num ($base)" ;;
+              *) numbers="$numbers $num" ;;
+            esac
+
+            # 3. Required metadata present
+            for field in 'Project' 'ADR ID' 'Status' 'Date' 'Authors' 'Affected Layers'; do
+              if ! grep -Eq "^\*\*$field:\*\*" "$f"; then
+                fail "$base: missing required metadata field '**$field:**'"
+              fi
+            done
+
+            # 4. Status value valid
+            status=$(grep -E '^\*\*Status:\*\*' "$f" | head -1 | sed -E 's/^\*\*Status:\*\*[[:space:]]*//' | tr -d '\r')
+            case "$status" in
+              PROPOSED|ACCEPTED|DEPRECATED) ;;
+              *) fail "$base: invalid Status '$status' (expected PROPOSED | ACCEPTED | DEPRECATED)" ;;
+            esac
+
+            # 5. Date format YYYY-MM-DD
+            date_val=$(grep -E '^\*\*Date:\*\*' "$f" | head -1 | sed -E 's/^\*\*Date:\*\*[[:space:]]*//' | tr -d '\r')
+            if ! echo "$date_val" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
+              fail "$base: invalid Date '$date_val' (expected YYYY-MM-DD)"
+            fi
+          done
+
+          # 6. INDEX.md data-row count == ADR file count
+          if [ -f "$index" ]; then
+            index_rows=$(grep -Ec '^\| ADR-[0-9]{3} ' "$index" || true)
+            if [ "$index_rows" -ne "$adr_count" ]; then
+              fail "INDEX.md lists $index_rows ADR rows but $adr_count ADR files exist"
+            fi
+          fi
+
+          if [ "$errors" -ne 0 ]; then
+            echo "ADR validation failed with $errors error(s)."
+            exit 1
+          fi
+          echo "ADR validation passed: $adr_count ADR(s) OK."
