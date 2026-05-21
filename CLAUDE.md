@@ -449,3 +449,19 @@ in the Pet Room. Intentional through-line.
 
 *Last updated: auto-generated from project documentation v2.1*
 *Ghostbusters × "If" × ARCore × Compose Canvas · Monster Catcher Android*
+
+---
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues (`gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default canonical label strings (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.

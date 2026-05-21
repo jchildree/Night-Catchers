@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\GreenSide\\\\OneDrive\\\\Documents\\\\GitHub\\\\Night-Catchers\\\\.claude\\\\Claud-itect-Skill-2\\\\install.ps1\" -ProjectPath \"C:\\\\Users\\\\GreenSide\\\\OneDrive\\\\Documents\\\\GitHub\\\\Night-Catchers\")",
+      "Bash(New-Item -ItemType File -Path \"C:\\\\Users\\\\GreenSide\\\\OneDrive\\\\Documents\\\\GitHub\\\\Night-Catchers\\\\.claude\\\\skills\\\\adr\\\\next-adr-number.sh\" -Force)",
+      "Bash(Out-Null)",
+      "Bash(chmod +x \"/c/Users/GreenSide/OneDrive/Documents/GitHub/Night-Catchers/.claude/skills/adr/next-adr-number.sh\")"
+    ]
+  }
+}
